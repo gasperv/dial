@@ -483,6 +483,34 @@ function ampFor(f){
   const base=cfg.loud ? 0.26*(weightFor(f)/NORM) : 0.085;
   return Math.min(0.42, base*(cfg.vol/0.45));
 }
+/* ---- iOS: get out of the ambient audio session ----
+   Safari runs Web Audio in the "ambient" category, which the ring/silent switch
+   mutes outright — the instrument looks alive and makes no sound at all. Claim a
+   playback session (Safari 16.4+); where that API is missing, hold a silent media
+   element open, which puts Safari in the same category. Either way it has to
+   happen inside the gesture that creates the context. */
+const SILENT_WAV="data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA";
+let unlockEl=null;
+const IOSISH=/iPad|iPhone|iPod/.test(navigator.userAgent||"")
+  || (navigator.maxTouchPoints>1 && /Macintosh/.test(navigator.userAgent||""));
+function claimPlayback(){
+  if(navigator.audioSession){
+    try{ if(navigator.audioSession.type!=="playback") navigator.audioSession.type="playback"; }catch(e){}
+    return;
+  }
+  if(!IOSISH) return;
+  try{
+    if(!unlockEl){
+      unlockEl=document.createElement("audio");
+      unlockEl.src=SILENT_WAV; unlockEl.loop=true; unlockEl.volume=0.001;
+      unlockEl.playsInline=true; unlockEl.setAttribute("playsinline","");
+      unlockEl.style.display="none"; document.body.appendChild(unlockEl);
+    }
+    const p=unlockEl.play(); if(p&&p.catch) p.catch(()=>{});
+  }catch(e){}
+}
+function releasePlayback(){ if(unlockEl){ try{ unlockEl.pause(); }catch(e){} } }
+
 function ensureCtx(){
   if(!ctx){
     const AC=window.AudioContext||window.webkitAudioContext;
@@ -490,7 +518,8 @@ function ensureCtx(){
     master=ctx.createGain(); master.gain.value=1; master.connect(ctx.destination);
     buildHum();
   }
-  if(ctx.state!=="running") ctx.resume();
+  claimPlayback();
+  if(ctx.state!=="running") ctx.resume().catch(()=>{});
 }
 /* the hum lives entirely above the tone band, so it colours the
    movement without ever covering what you're listening to */
@@ -528,6 +557,7 @@ function sound(f){
   gain.gain.setTargetAtTime(Math.max(0.004, ampFor(f)), ctx.currentTime, 0.06);
 }
 function silence(){
+  setTimeout(releasePlayback, 600);       // after the 0.38 s fade has run out
   if(humGain) humGain.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
   if(!osc){ sounding=false; if(padEl) padEl.classList.remove("live"); return; }
   const o=osc, g=gain; osc=null; gain=null; sounding=false;
@@ -556,6 +586,7 @@ function enableBackground(){
     document.body.appendChild(mediaEl);
     const p=mediaEl.play();
     if(p&&p.catch) p.catch(()=>disableBackground(true));
+    releasePlayback();                    // the stream element owns the session now
     bgMode=true;
     setTimeout(()=>{ if(bgMode&&mediaEl&&mediaEl.paused) disableBackground(true); },600);
   }catch(e){ disableBackground(true); }
