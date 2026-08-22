@@ -57,6 +57,10 @@
      spots you actually earned are what you see */
   .pad.narrowing .padglow{opacity:.08;animation:none}
   @keyframes breathe{0%,100%{opacity:.10}50%{opacity:.30}}
+  /* the plate is worn where hands have been. it says "here" without a word,
+     and gets out of the way the moment one lands. */
+  #patina{opacity:0;transition:opacity .8s ease}
+  .pad.idle #patina{opacity:1}
 
   #s-tune.virgin .after{display:none}
   .after{animation:fade .55s ease both}
@@ -161,6 +165,18 @@
           <clipPath id="cp-tri" clipPathUnits="userSpaceOnUse">
             <polygon points="50,6.58 6.6,88.36 93.4,88.36"/>
           </clipPath>
+          <radialGradient id="wear">
+            <stop offset="0%" stop-color="#c39140" stop-opacity=".085"/>
+            <stop offset="55%" stop-color="#c39140" stop-opacity=".035"/>
+            <stop offset="100%" stop-color="#c39140" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="wearmask">
+            <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+          </radialGradient>
+          <mask id="wearm" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="94">
+            <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wearmask)"/>
+          </mask>
           <radialGradient id="heatg">
             <stop offset="0%" stop-color="#c39140" stop-opacity=".5"/>
             <stop offset="60%" stop-color="#c39140" stop-opacity=".16"/>
@@ -169,6 +185,11 @@
         </defs>
         <g id="tri-g">
           <g id="tri-cold">
+            <g id="patina" clip-path="url(#cp-tri)">
+              <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wear)"/>
+              <g id="tri-lat-worn" mask="url(#wearm)" stroke="rgba(232,224,207,.115)"
+                 stroke-width="0.13" vector-effect="non-scaling-stroke"></g>
+            </g>
             <polygon id="tri-out" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
                      stroke="#7a5c2b" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
             <g id="tri-lat" stroke="rgba(232,224,207,.115)" stroke-width="0.13"
@@ -1036,6 +1057,7 @@ loop();
     s+=L(ab,ac)+L(ba,bc)+L(ca,cb);
   }
   g.innerHTML=s;
+  const w=$("#tri-lat-worn"); if(w) w.innerHTML=s;
 })();
 
 /* no rounds, no gates between screens: the plane is the landing page and
