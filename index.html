@@ -272,8 +272,8 @@
 
         <p class="bench-lab sep">Sound &amp; terrain</p>
         <div class="knob"><label for="vol">Volume</label>
-          <input type="range" id="vol" min="5" max="100" step="1" value="45">
-          <span class="val" id="v-vol">45%</span></div>
+          <input type="range" id="vol" min="5" max="100" step="1" value="100">
+          <span class="val" id="v-vol">100%</span></div>
         <div class="knob"><label for="hum">Tuning hum</label>
           <input type="range" id="hum" min="0" max="100" step="1" value="45">
           <span class="val" id="v-hum">45%</span></div>
@@ -372,7 +372,7 @@ const posOf=f=>Math.log2(f/F_MIN)/SPAN;
 const cents=(a,b)=>1200*Math.log2(b/a);
 const NEED_OCT=1.5;
 
-let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:0.45};
+let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:1};
 const NARROWINGS=1;                 /* sweep, then the plane. that is the whole app. */
 /* the whole feel of the instrument, live-editable from the bench under the dial */
 let feel={omega:8.0, zeta:1.04, gear:0.72, drag:1.9, smooth:0.050, fr:4.4, scan:0.68};
@@ -479,9 +479,13 @@ function aWeightDb(f){
 }
 const weightFor=f=>Math.pow(10,-aWeightDb(f)/20);
 const NORM=weightFor(F_MIN);
+/* the instrument runs wide open: the loudest tone it can make sits just under
+   full scale, so the phone's own volume keys are the only volume control that
+   matters. 0.85 leaves exactly the headroom the hum (0.10) can add. */
+const CEIL=0.85;
 function ampFor(f){
-  const base=cfg.loud ? 0.26*(weightFor(f)/NORM) : 0.085;
-  return Math.min(0.42, base*(cfg.vol/0.45));
+  const shape=cfg.loud ? weightFor(f)/NORM : 1;   // 1 at the loudest-perceived end
+  return Math.min(CEIL, CEIL*cfg.vol*shape);
 }
 /* ---- iOS: get out of the ambient audio session ----
    Safari runs Web Audio in the "ambient" category, which the ring/silent switch
@@ -514,13 +518,52 @@ function releasePlayback(){ if(unlockEl){ try{ unlockEl.pause(); }catch(e){} } }
 function ensureCtx(){
   if(!ctx){
     const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return;
     ctx=new AC();
     master=ctx.createGain(); master.gain.value=1; master.connect(ctx.destination);
     buildHum();
+    /* an interruption (a call, a switch away) can suspend us again — re-arm so
+       the next tap anywhere revives it instead of leaving a dead instrument */
+    ctx.onstatechange=()=>{ if(!ctx) return; if(ctx.state==="running") markReady(); else armUnlock(); };
   }
   claimPlayback();
-  if(ctx.state!=="running") ctx.resume().catch(()=>{});
+  if(ctx.state!=="running"){
+    const p=ctx.resume();
+    if(p&&p.then) p.then(markReady,()=>{}); else markReady();
+  }else markReady();
 }
+/* ---- the gate ----
+   On a touch screen a pointerdown grants no user activation: per spec only
+   pointerup / touchend / click do. So a context created and resumed on
+   touch-DOWN stays suspended, the first sweep is silent, and only the lift
+   that ends it buys the activation the *next* touch spends. On iOS it never
+   recovers at all, because the silent-switch escape below also only ever ran
+   from that same dead pointerdown. Fix: prime from every event that actually
+   does grant activation, and keep those listeners armed until one takes. */
+let audioReady=false;
+const UNLOCK_EV=["pointerup","touchend","click","keydown"];
+function armUnlock(){
+  audioReady=false;
+  UNLOCK_EV.forEach(t=>document.addEventListener(t, primeAudio, true));
+}
+function markReady(){
+  if(audioReady||!ctx||ctx.state!=="running") return;   // a pending resume is not a running one
+  audioReady=true;
+  UNLOCK_EV.forEach(t=>document.removeEventListener(t, primeAudio, true));
+}
+function primeAudio(){
+  ensureCtx();
+  if(!ctx) return;
+  /* one sample of nothing, pushed through the graph inside the gesture —
+     this is what actually flips the bit on iOS */
+  try{
+    const s=ctx.createBufferSource();
+    s.buffer=ctx.createBuffer(1,1,ctx.sampleRate);
+    s.connect(ctx.destination); s.start(0);
+  }catch(e){}
+  markReady();
+}
+armUnlock();
 /* the hum lives entirely above the tone band, so it colours the
    movement without ever covering what you're listening to */
 function buildHum(){
@@ -544,6 +587,7 @@ function setHum(drive){
 }
 function ensureTone(f){
   ensureCtx();
+  if(!ctx) return;
   if(!osc){
     osc=ctx.createOscillator(); osc.type="sine"; osc.frequency.value=f;
     gain=ctx.createGain(); gain.gain.value=0.0001;
@@ -553,6 +597,7 @@ function ensureTone(f){
 }
 function sound(f){
   ensureTone(f);
+  if(!osc) return;
   osc.frequency.setTargetAtTime(f, ctx.currentTime, 0.05);
   gain.gain.setTargetAtTime(Math.max(0.004, ampFor(f)), ctx.currentTime, 0.06);
 }
@@ -597,6 +642,7 @@ function disableBackground(quiet){
   try{ master.connect(ctx.destination); }catch(e){}
   if(mediaEl){ try{ mediaEl.pause(); mediaEl.srcObject=null; mediaEl.remove(); }catch(e){} mediaEl=null; }
   streamDest=null; bgMode=false; clearMediaSession();
+  claimPlayback();      // the stream element owned the session; take it back
   if(!quiet) setBgNote("");
 }
 function setMediaSession(tn){
@@ -991,9 +1037,16 @@ function syncPhase(){
    the smaller the plane is drawn, the more band a given push covers — that is
    the whole point of opening small. */
 function gearNow(){ return feel.gear/Math.max(0.05,dispScale); }
+let hinted=false;
 padEl.addEventListener("pointerdown", e=>{
   if(trans) return;
-  padEl.setPointerCapture(e.pointerId); ensureCtx();
+  padEl.setPointerCapture(e.pointerId); primeAudio();
+  /* if the touch-down could not buy activation, say so once rather than
+     letting the instrument read as broken for one sweep */
+  if(!audioReady&&!hinted&&e.pointerType!=="mouse") setTimeout(()=>{
+    if(audioReady||hinted) return;
+    hinted=true; toast("Lift your finger once to wake the sound");
+  },350);
   padEl.classList.remove("idle");
   $("#s-tune").classList.remove("virgin");
   dragging=true; engaged=true;
@@ -1289,7 +1342,7 @@ $("#vol").addEventListener("input", e=>{
 });
 
 /* ================= the bench ================= */
-const FEELKEY="solfeggio:feel:2";   /* bumped so the new defaults are not overridden by an old save */
+const FEELKEY="solfeggio:feel:3";   /* bumped so the new defaults are not overridden by an old save */
 const KNOBS=[
   {id:"om", key:"omega",  to:v=>v/10,   from:v=>Math.round(v*10),   fmt:v=>"ω "+v.toFixed(1)},
   {id:"ze", key:"zeta",   to:v=>v/100,  from:v=>Math.round(v*100),  fmt:v=>"ζ "+v.toFixed(2)},
