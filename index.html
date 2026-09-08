@@ -364,9 +364,17 @@ const TONES = [
    stones:"Amethyst, labradorite, sodalite"},
   {f:963, syl:"SI", chakra:"Crown · Sahasrara",
    theme:"Unity, silence, the return upward",
-   stones:"Clear quartz, selenite, moonstone"}
+   stones:"Clear quartz, selenite, moonstone"},
+  /* past 963 the solfeggio set runs out. these two come from the number
+     traditions instead, and the briefing says so rather than pretending. */
+  {f:999, syl:"", chakra:"Above the crown — the closing of the circuit",
+   theme:"Completion, the last turn of something long, letting a finished thing be finished",
+   stones:"Selenite, apophyllite, herkimer diamond"},
+  {f:1111, syl:"", chakra:"Beyond the body — the threshold",
+   theme:"Attention snapping into place, the sense of being addressed, a door noticed",
+   stones:"Danburite, phenacite, clear calcite"}
 ];
-const F_MIN=140, F_MAX=1150;
+const F_MIN=140, F_MAX=1220;   /* the top moved up with 1111 so it keeps a catchment, not a sliver */
 const SPAN=Math.log2(F_MAX/F_MIN);
 const posOf=f=>Math.log2(f/F_MIN)/SPAN;
 const cents=(a,b)=>1200*Math.log2(b/a);
@@ -1229,10 +1237,14 @@ async function finish(){
       +"% of the starting width, so you were lingering in several places at once rather than one.");
   if(Math.abs(s.off)>200)
     notes.push("You landed more than two semitones from the tone it snapped to. Most of a continuous band belongs to no solfeggio frequency, so this is the ordinary case — the snap is a label, not a discovery.");
-  if(s.i===2||s.i===3)
+  if(x.f===396||x.f===417)
     notes.push("396 and 417 Hz sit 89 cents apart, closer than a semitone. Treat the pair as one region rather than a choice.");
-  if(s.i===0)
+  if(x.f===174)
     notes.push("174 Hz has the widest empty stretch around it, so it catches landings that aren't really about 174 Hz.");
+  if(x.f===963||x.f===999)
+    notes.push("963 and 999 Hz are only 64 cents apart — the tightest pair on the dial, tighter than 396 and 417. Reading a difference between them is reading noise.");
+  if(x.f===999||x.f===1111)
+    notes.push("999 and 1111 Hz are not solfeggio tones; they come from the number traditions and were added to the dial on top of the nine. That is worth knowing before you weigh what landing here means.");
   notes.push(past.length
     ? "One sweep is one reading. What means something is whether the same region keeps coming back on terrain that is redrawn from scratch every time — which is what the list below is for."
     : "One sweep is one reading. Save it, and the next sitting gets terrain redrawn from scratch — if the same region comes back, that is worth something.");
