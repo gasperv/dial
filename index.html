@@ -3,29 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f7f7f7">
+<meta name="theme-color" content="#fbfbfb">
 <title>The Dial</title>
 <style>
   :root{
-    /* aluminium, glass and graphite. one restrained aqua does all the "this is
-       live" work — everything structural stays neutral. */
-    --page-top:#f7f7f7; --page-bot:#dcdcdc;
-    --plate:#f0f0f0;
-    --rule:#c2c2c2; --rule-soft:#d7d7d7; --edge:#b6b6b6;
-    --graphite:#3a3a3d; --dim:#6f6f74; --faint:#8a8a90;
-    --steel:#6e7175; --steel-dim:#9b9ea2;
-    --aqua:#4a7fb5; --aqua-dim:#84a8c9; --aqua-deep:#2f5f8e;
-    /* that era of macOS shipped a Graphite appearance beside Aqua: same
-       gloss, no hue. the chrome wears it, which leaves the blue free to
-       mean one thing only — live. */
-    --ctl:#7c7f83; --ctl-mid:#5f6266; --ctl-deep:#4a4d50;
-    --rust:#a9552f;
-    --emboss:rgba(255,255,255,.9);
-    /* the 2010 desktop face, with the mono that shipped beside it. no webfont,
-       so nothing to load and nothing to drift. */
-    --display:"Helvetica Neue",Helvetica,"Lucida Grande",Arial,sans-serif;
-    --body:"Lucida Grande","Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Roboto,sans-serif;
-    --mono:Menlo,Monaco,ui-monospace,SFMono-Regular,"Roboto Mono",monospace;
+    /* milled aluminium: near-white silver, hairline edges, nothing glossy.
+       the only colour on the screen is a dark forest green, and it is only
+       ever used to mean live. */
+    --page-top:#fbfbfb; --page-bot:#e9e9e7;
+    --alu-hi:#fafaf8; --alu:#f1f1ef; --alu-lo:#e6e6e4;
+    --edge:#d6d6d3; --rule:#dcdcd9; --rule-soft:#e6e6e3;
+    --graphite:#2c2c2e; --dim:#6b6b6f; --faint:#8e8e92;
+    --steel:#5f6165; --steel-dim:#adadaa;
+    --forest:#22453a; --forest-mid:#2d5a4a; --forest-deep:#17322a; --forest-dim:#6d8f81;
+    --rust:#96573a;
+    /* the system face, not a period one. no webfont, nothing to load. */
+    --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,"Segoe UI",Roboto,sans-serif;
+    --mono:"SF Mono",Menlo,Monaco,ui-monospace,SFMono-Regular,"Roboto Mono",monospace;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;overscroll-behavior:none}
@@ -37,21 +32,15 @@
   }
   .wrap{max-width:760px;margin:0 auto}
   #s-result{max-width:560px;margin:0 auto}
-  /* letterpress — the one trick that era used to keep light on light legible.
-     a white shadow one pixel down, nothing more. */
-  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--faint);margin:0 0 8px;
-    text-shadow:0 1px 0 var(--emboss)}
-  h1{font-family:var(--display);font-weight:300;letter-spacing:.02em;
-    font-size:32px;line-height:1.1;margin:0 0 12px;color:var(--graphite);
-    text-shadow:0 1px 0 var(--emboss)}
-  h2{font-family:var(--display);font-weight:400;letter-spacing:.01em;
-    font-size:20px;margin:0 0 8px;color:var(--graphite);
-    text-shadow:0 1px 0 var(--emboss)}
-  p{margin:0 0 14px;color:#55555a}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+  h1{font-family:var(--display);font-weight:600;letter-spacing:-.018em;
+    font-size:33px;line-height:1.08;margin:0 0 12px;color:var(--graphite)}
+  h2{font-family:var(--display);font-weight:600;letter-spacing:-.012em;
+    font-size:21px;margin:0 0 8px;color:var(--graphite)}
+  p{margin:0 0 14px;color:#4e4e53}
   .quiet{color:var(--dim);font-size:13.5px;line-height:1.5}
-  .rule{height:1px;background:var(--rule-soft);border:0;margin:22px 0;
-    box-shadow:0 1px 0 var(--emboss)}
+  .rule{height:1px;background:var(--rule-soft);border:0;margin:22px 0}
   .screen{display:none}
   .screen.on{display:block;animation:fade .5s ease both}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -60,18 +49,25 @@
   /* on the dial the pad IS the frame — no cabinet around a cabinet */
   .cabinet{margin:0;padding:0;background:none;border:0;box-shadow:none}
 
-  /* the pad is a recessed glass trackpad: milled edge, inner shadow, and one
-     hairline of white underneath so it sits IN the page rather than on it */
+  /* one milled slab. the metal is carried by a soft angled sheen, not by a
+     brush pattern: any repeating grain coarse enough to see is also coarse
+     enough to moire against a phone pixel grid, so the grain is held near
+     the noise floor and the sheen does the work. no inner bevel — the
+     surface is continuous, not a recess cut into the page. */
   .pad{position:relative;margin:0 auto;
     width:min(100%, calc(80vh / 0.94));aspect-ratio:1/0.94;
-    background:linear-gradient(180deg,#fcfcfc 0%,#ededed 52%,#e3e3e3 100%);
-    border:1px solid var(--edge);border-radius:6px;touch-action:none;user-select:none;
+    background:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.14) 0 1px,
+        rgba(118,118,116,.008) 1px 2px,rgba(255,255,255,0) 2px 3px),
+      linear-gradient(102deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.16) 26%,
+        rgba(255,255,255,0) 46%,rgba(120,120,118,.05) 78%,rgba(120,120,118,.09) 100%),
+      radial-gradient(130% 105% at 50% 0%,#fdfdfc 0%,#f1f1ef 56%,#e6e6e3 100%);
+    border:1px solid var(--edge);border-radius:18px;touch-action:none;user-select:none;
     cursor:crosshair;overflow:hidden;
-    box-shadow:inset 0 1px 3px rgba(0,0,0,.14),inset 0 0 0 1px rgba(255,255,255,.5),
-      0 1px 0 var(--emboss)}
+    box-shadow:0 1px 2px rgba(0,0,0,.05),0 12px 32px -20px rgba(0,0,0,.4)}
   .pad svg{position:absolute;inset:0;width:100%;height:100%}
   .padglow{position:absolute;width:210px;height:210px;margin:-105px 0 0 -105px;
-    background:radial-gradient(closest-side,rgba(74,127,181,.30),rgba(74,127,181,0) 72%);
+    background:radial-gradient(closest-side,rgba(34,69,58,.22),rgba(34,69,58,0) 72%);
     pointer-events:none;transition:opacity .35s;opacity:.18}
   .pad.live .padglow{opacity:1}
   /* the untouched instrument breathes, so it reads as waiting for you */
@@ -88,122 +84,110 @@
   #s-tune.virgin .after{display:none}
   .after{animation:fade .55s ease both}
 
-  .levelrow{display:flex;justify-content:center;align-items:center;margin-top:14px}
+  .levelrow{display:flex;justify-content:center;align-items:center;margin-top:16px}
   .levels{display:flex;gap:6px;align-items:center}
-  .levels i{width:22px;height:2px;background:var(--rule-soft);display:block;
-    box-shadow:0 1px 0 var(--emboss)}
+  .levels i{width:22px;height:2px;background:var(--rule);display:block;border-radius:1px}
   .levels i.done{background:var(--steel-dim)}
-  .levels i.now{background:var(--aqua)}
+  .levels i.now{background:var(--forest)}
 
   /* ---- the bench ---- */
   .bench{margin-top:2px}
   .bench-head{display:flex;justify-content:flex-end}
   .bench-tog{background:transparent;border:0;padding:9px;line-height:0;color:var(--faint);
-    opacity:.75;transition:opacity .25s,color .25s}
-  .bench-tog:hover{opacity:1;color:var(--steel)}
-  .bench.open .bench-tog{opacity:1;color:var(--graphite)}
-  .bench-body{display:none;margin-top:4px;padding-top:16px;border-top:1px solid var(--rule-soft);
-    box-shadow:inset 0 1px 0 var(--emboss)}
+    transition:color .25s}
+  .bench-tog:hover{color:var(--steel)}
+  .bench.open .bench-tog{color:var(--forest)}
+  .bench-body{display:none;margin-top:4px;padding-top:16px;border-top:1px solid var(--rule-soft)}
   .bench.open .bench-body{display:block}
-  .bench-lab{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--faint);margin:0 0 9px;text-shadow:0 1px 0 var(--emboss)}
+  .bench-lab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--faint);margin:0 0 9px}
   .bench-lab.sep{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule-soft)}
   .bench-pre{display:flex;gap:6px;margin-bottom:12px}
-  /* the aqua-era pill: white-to-silver gloss, hairline edge, white top seam */
-  .bench-pre button{flex:1;background:linear-gradient(180deg,#fff 0%,#e8e8e8 100%);
-    border:1px solid var(--edge);border-radius:4px;color:var(--steel);
-    text-shadow:0 1px 0 var(--emboss);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 1px rgba(0,0,0,.07);
-    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 4px}
-  .bench-pre button.on{background:linear-gradient(180deg,var(--ctl) 0%,var(--ctl-mid) 100%);
-    border-color:var(--ctl-deep);color:#fff;font-weight:600;text-shadow:0 -1px 0 rgba(0,0,0,.35);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -2px 3px rgba(0,0,0,.2)}
-  .knob{display:grid;grid-template-columns:84px 1fr 62px;gap:6px 10px;align-items:center;margin-bottom:9px}
-  .knob label{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;
-    text-transform:uppercase;color:var(--dim);line-height:1.25;text-shadow:0 1px 0 var(--emboss)}
-  .knob input[type=range]{width:100%;accent-color:var(--steel);margin:0}
-  .knob .val{font-family:var(--mono);font-size:10.5px;color:var(--steel);text-align:right;
-    text-shadow:0 1px 0 var(--emboss)}
+  /* every control is the same milled blank; selection fills it, nothing more */
+  .bench-pre button{flex:1;background:linear-gradient(180deg,var(--alu-hi) 0%,var(--alu-lo) 100%);
+    border:1px solid var(--edge);border-radius:9px;color:var(--steel);
+    box-shadow:0 1px 1.5px rgba(0,0,0,.045);
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:9px 4px}
+  .bench-pre button:hover{border-color:#c4c4c1}
+  .bench-pre button.on{background:var(--forest);border-color:var(--forest);color:#fff;
+    box-shadow:none}
+  .knob{display:grid;grid-template-columns:84px 1fr 62px;gap:6px 10px;align-items:center;margin-bottom:10px}
+  .knob label{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--dim);line-height:1.25}
+  .knob input[type=range]{width:100%;accent-color:var(--forest);margin:0}
+  .knob .val{font-family:var(--mono);font-size:10.5px;color:var(--steel);text-align:right}
   .knob .val.warn{color:var(--rust)}
   /* one control, divided — not a row of buttons that happen to touch */
-  .knob .seg{display:flex;border:1px solid var(--edge);border-radius:4px;overflow:hidden;
-    background:linear-gradient(180deg,#fff 0%,#e8e8e8 100%);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 1px rgba(0,0,0,.07)}
-  .knob .seg button{flex:1;background:transparent;border:0;border-left:1px solid #cdcdcd;
-    color:var(--steel);padding:6px 4px;text-shadow:0 1px 0 var(--emboss);
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.06em}
+  .knob .seg{display:flex;border:1px solid var(--edge);border-radius:9px;overflow:hidden;
+    background:linear-gradient(180deg,var(--alu-hi) 0%,var(--alu-lo) 100%);
+    box-shadow:0 1px 1.5px rgba(0,0,0,.045)}
+  .knob .seg button{flex:1;background:transparent;border:0;border-left:1px solid var(--rule);
+    color:var(--steel);padding:7px 4px;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.05em}
   .knob .seg button:first-child{border-left:0}
-  .knob .seg button.on{background:linear-gradient(180deg,var(--ctl) 0%,var(--ctl-mid) 100%);
-    color:#fff;font-weight:600;text-shadow:0 -1px 0 rgba(0,0,0,.35)}
-  .bench-note{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--faint);
-    line-height:1.6;margin:12px 0 0}
+  .knob .seg button.on{background:var(--forest);color:#fff;border-left-color:var(--forest)}
+  .bench-note{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--faint);
+    line-height:1.6;margin:14px 0 0}
 
   /* ================= controls ================= */
-  button{font:inherit;color:inherit;cursor:pointer;border-radius:4px}
-  /* the one blue thing on the screen: the primary action */
-  .next{display:block;width:100%;margin-top:18px;border-radius:5px;
-    background:linear-gradient(180deg,var(--ctl) 0%,var(--ctl-mid) 52%,var(--ctl-deep) 100%);
-    border:1px solid #3d4043;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.38);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 1px 1px rgba(0,0,0,.12);
-    font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
-    padding:16px;font-weight:600}
-  .next:active{background:linear-gradient(180deg,var(--ctl-mid) 0%,var(--ctl-deep) 100%);
-    box-shadow:inset 0 2px 4px rgba(0,0,0,.25)}
-  .ghost{background:linear-gradient(180deg,#fff 0%,#e8e8e8 100%);
-    border:1px solid var(--edge);border-radius:5px;color:var(--steel);
-    text-shadow:0 1px 0 var(--emboss);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 1px rgba(0,0,0,.07);
-    font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:13px 14px}
-  .ghost:hover{color:var(--graphite);border-color:#a4a4a4}
-  .ghost:active{background:linear-gradient(180deg,#e4e4e4 0%,#f2f2f2 100%);
-    box-shadow:inset 0 2px 3px rgba(0,0,0,.12)}
+  button{font:inherit;color:inherit;cursor:pointer;border-radius:9px}
+  /* the primary action is the one filled thing on the screen */
+  .next{display:block;width:100%;margin-top:18px;border-radius:12px;
+    background:var(--forest);border:1px solid var(--forest);color:#fff;
+    font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    padding:17px;font-weight:500;transition:background .18s}
+  .next:hover{background:var(--forest-mid);border-color:var(--forest-mid)}
+  .next:active{background:var(--forest-deep);border-color:var(--forest-deep)}
+  .ghost{background:linear-gradient(180deg,var(--alu-hi) 0%,var(--alu-lo) 100%);
+    border:1px solid var(--edge);border-radius:11px;color:var(--steel);
+    box-shadow:0 1px 1.5px rgba(0,0,0,.045);
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:14px}
+  .ghost:hover{color:var(--graphite);border-color:#c4c4c1}
+  .ghost:active{background:var(--alu-lo)}
   .row{display:flex;gap:10px;margin-top:14px}
   .row > *{flex:1}
-  button:focus-visible,input:focus-visible,.pad:focus-visible{outline:2px solid var(--aqua);outline-offset:3px}
+  button:focus-visible,input:focus-visible,.pad:focus-visible{outline:2px solid var(--forest);outline-offset:3px}
 
   /* ================= briefing ================= */
-  .verdict{text-align:center;padding:6px 0 2px}
-  .hz{font-family:var(--mono);font-size:66px;line-height:1;letter-spacing:-.02em;
-    color:var(--graphite);margin:0;text-shadow:0 1px 0 var(--emboss)}
-  .hz span{font-size:19px;color:var(--faint);letter-spacing:.08em;margin-left:5px}
-  .named{font-family:var(--display);font-weight:300;letter-spacing:.24em;
-    font-size:17px;color:var(--aqua);margin:12px 0 0;text-shadow:0 1px 0 var(--emboss)}
-  .snapline{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim);margin:12px 0 0}
-  .agree{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  .verdict{text-align:center;padding:10px 0 2px}
+  .hz{font-family:var(--display);font-size:74px;font-weight:600;line-height:1;
+    letter-spacing:-.035em;color:var(--graphite);margin:0}
+  .hz span{font-size:20px;font-weight:400;color:var(--faint);letter-spacing:0;margin-left:7px}
+  .named{font-family:var(--display);font-weight:500;letter-spacing:.22em;
+    font-size:16px;color:var(--forest);margin:14px 0 0}
+  .snapline{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);margin:12px 0 0}
+  .agree{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--faint);margin:8px 0 0}
-  .plot{margin:14px 0 0;border:1px solid var(--rule);border-radius:5px;background:#fff;padding:2px;
-    box-shadow:inset 0 1px 2px rgba(0,0,0,.08),0 1px 0 var(--emboss)}
-  .plot svg,.plot canvas{display:block;width:100%;height:auto;border-radius:3px}
-  .strip-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--faint);margin:20px 0 6px;text-shadow:0 1px 0 var(--emboss)}
-  /* a raised plate, the way every settings pane of that decade was */
-  .card{border:1px solid var(--rule);border-radius:6px;padding:18px;margin:22px 0 0;
-    background:linear-gradient(180deg,#fdfdfd 0%,var(--plate) 100%);
-    box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.07)}
-  .kv{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--rule-soft);font-size:14px}
+  .plot{margin:14px 0 0;border:1px solid var(--rule);border-radius:14px;background:#fff;padding:3px;
+    box-shadow:0 1px 2px rgba(0,0,0,.045);overflow:hidden}
+  .plot svg,.plot canvas{display:block;width:100%;height:auto;border-radius:11px}
+  .strip-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--faint);margin:22px 0 6px}
+  /* a single milled panel, same family as the pad and the buttons */
+  .card{border:1px solid var(--rule);border-radius:14px;padding:18px;margin:22px 0 0;
+    background:linear-gradient(180deg,#fdfdfc 0%,var(--alu) 100%);
+    box-shadow:0 1px 2px rgba(0,0,0,.045)}
+  .kv{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--rule-soft);font-size:14px}
   .kv:last-child{border-bottom:0}
-  .kv .k{flex:0 0 92px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--faint);padding-top:4px;text-shadow:0 1px 0 var(--emboss)}
-  .kv .v{flex:1;color:#4d4d52}
+  .kv .k{flex:0 0 92px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);padding-top:4px}
+  .kv .v{flex:1;color:#46464b}
   .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:12px}
-  .key{background:linear-gradient(180deg,#fff 0%,#e8e8e8 100%);
-    border:1px solid var(--edge);border-radius:4px;color:var(--steel);
-    text-shadow:0 1px 0 var(--emboss);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 1px rgba(0,0,0,.07);
-    font-family:var(--mono);font-size:13px;padding:14px 4px}
-  .key.on{background:linear-gradient(180deg,var(--aqua-dim) 0%,var(--aqua) 100%);
-    border-color:var(--aqua-deep);color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.3);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 3px rgba(0,0,0,.16)}
-  .bgnote{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--aqua);margin:12px 0 0;min-height:14px;opacity:0;transition:opacity .3s}
+  .key{background:linear-gradient(180deg,var(--alu-hi) 0%,var(--alu-lo) 100%);
+    border:1px solid var(--edge);border-radius:10px;color:var(--steel);
+    box-shadow:0 1px 1.5px rgba(0,0,0,.045);
+    font-family:var(--mono);font-size:13px;padding:15px 4px;transition:border-color .18s}
+  .key:hover{border-color:#c4c4c1}
+  .key.on{background:var(--forest);border-color:var(--forest);color:#fff;box-shadow:none}
+  .bgnote{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--forest);margin:12px 0 0;min-height:14px;opacity:0;transition:opacity .3s}
   .hist{font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.8}
   .hist b{color:var(--steel);font-weight:400}
-  /* the HUD stayed dark even after everything around it went light */
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
-    background:rgba(46,46,48,.9);border:1px solid rgba(0,0,0,.3);border-radius:9px;color:#fff;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 6px 18px -6px rgba(0,0,0,.5);
-    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-    padding:12px 18px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:9}
+    background:rgba(38,38,40,.92);border:0;border-radius:13px;color:#fff;
+    box-shadow:0 8px 24px -8px rgba(0,0,0,.45);
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    padding:13px 19px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:9}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
   @media (prefers-reduced-motion:reduce){
     .screen.on{animation:none}
@@ -238,9 +222,9 @@
             <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wearmask)"/>
           </mask>
           <radialGradient id="heatg">
-            <stop offset="0%" stop-color="#4a7fb5" stop-opacity=".5"/>
-            <stop offset="60%" stop-color="#4a7fb5" stop-opacity=".16"/>
-            <stop offset="100%" stop-color="#4a7fb5" stop-opacity="0"/>
+            <stop offset="0%" stop-color="#22453a" stop-opacity=".34"/>
+            <stop offset="60%" stop-color="#22453a" stop-opacity=".11"/>
+            <stop offset="100%" stop-color="#22453a" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <g id="tri-g">
@@ -251,16 +235,16 @@
                  stroke-width="0.13" vector-effect="non-scaling-stroke"></g>
             </g>
             <polygon id="tri-out" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
-                     stroke="#a9a9ad" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
+                     stroke="#c4c4c1" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
             <g id="tri-lat" stroke="rgba(58,58,61,.14)" stroke-width="0.13"
                vector-effect="non-scaling-stroke"></g>
             <!-- the outline lights up as you cover ground: full circuit = you may rest -->
             <!-- dash lengths must live in user units, so no non-scaling-stroke here -->
             <polygon id="tri-charge" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
-                     stroke="#4a7fb5" stroke-width="0.55" stroke-linejoin="round" opacity="0"/>
+                     stroke="#22453a" stroke-width="0.55" stroke-linejoin="round" opacity="0"/>
           </g>
           <g id="heat" opacity="0"></g>
-          <polygon id="tri-sub" fill="none" stroke="#4a7fb5" stroke-width="0.36"
+          <polygon id="tri-sub" fill="none" stroke="#22453a" stroke-width="0.36"
                    vector-effect="non-scaling-stroke" opacity="0"/>
           <g id="hands" clip-path="url(#cp-tri)">
             <line id="ln-a" stroke="rgba(58,58,61,.36)" stroke-width="0.34"
@@ -271,12 +255,12 @@
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
           </g>
         </g>
-        <circle id="v-a" r="0.9" fill="#9b9ea2"/>
-        <circle id="v-b" r="0.9" fill="#9b9ea2"/>
-        <circle id="v-c" r="0.9" fill="#9b9ea2"/>
-        <circle id="puck" r="1.5" fill="#3a3a3d"/>
+        <circle id="v-a" r="0.9" fill="#a8a8a5"/>
+        <circle id="v-b" r="0.9" fill="#a8a8a5"/>
+        <circle id="v-c" r="0.9" fill="#a8a8a5"/>
+        <circle id="puck" r="1.5" fill="#2c2c2e"/>
         <!-- holding still closes a ring around the point; closed = committed -->
-        <circle id="hold-ring" r="6.2" fill="none" stroke="#4a7fb5" stroke-width="0.55"
+        <circle id="hold-ring" r="6.2" fill="none" stroke="#22453a" stroke-width="0.55"
                 stroke-linecap="round" opacity="0"/>
       </svg>
     </div>
@@ -1362,28 +1346,28 @@ function triPlot(r, hitHz){
   for(let j=0;j<H2;j++){
     for(let k=0;k<W2;k++){
       const x=k/(W2-1), y=j/(H2-1), o=(j*W2+k)*4;
-      if(!insideTri([x,y])){ dat[o]=232;dat[o+1]=232;dat[o+2]=233;dat[o+3]=255; continue; }
+      if(!insideTri([x,y])){ dat[o]=240;dat[o+1]=240;dat[o+2]=238;dat[o+3]=255; continue; }
       const v=fieldAt(r.field,x,y);
       /* paper, darkening as the terrain climbs */
-      let rr=250-v*44, gg=250-v*44, bb=251-v*43;
+      let rr=252-v*46, gg=252-v*46, bb=250-v*46;
       let best=1e9;
       for(let n=0;n<TONES.length;n++){
         const d=Math.abs(v-posOf(TONES[n].f));
         if(d<best) best=d;
       }
       const near=Math.abs(v-hitPos);
-      if(near<0.012){ const a=1-near/0.012; rr+=(74-rr)*a; gg+=(127-gg)*a; bb+=(181-bb)*a; }
-      else if(best<0.006){ const a=1-best/0.006; rr+=(150-rr)*a; gg+=(152-gg)*a; bb+=(157-bb)*a; }
+      if(near<0.012){ const a=1-near/0.012; rr+=(34-rr)*a; gg+=(69-gg)*a; bb+=(58-bb)*a; }
+      else if(best<0.006){ const a=1-best/0.006; rr+=(168-rr)*a; gg+=(168-gg)*a; bb+=(165-bb)*a; }
       dat[o]=rr|0; dat[o+1]=gg|0; dat[o+2]=bb|0; dat[o+3]=255;
     }
   }
   c.putImageData(img,0,0);
-  c.strokeStyle="#b4b4b8"; c.lineWidth=1;
+  c.strokeStyle="#cfcfcc"; c.lineWidth=1;
   c.beginPath();
   c.moveTo(VA[0]*W2,VA[1]*H2); c.lineTo(VB[0]*W2,VB[1]*H2); c.lineTo(VC[0]*W2,VC[1]*H2); c.closePath();
   c.stroke();
   if(r.vs<0.995){
-    c.strokeStyle="#4a7fb5"; c.lineWidth=1.4;
+    c.strokeStyle="#22453a"; c.lineWidth=1.4;
     c.beginPath();
     TRI_V.forEach(function(v,n){
       const px=(r.vc[0]+r.vs*(v[0]-TRIC[0]))*W2, py=(r.vc[1]+r.vs*(v[1]-TRIC[1]))*H2;
@@ -1391,12 +1375,12 @@ function triPlot(r, hitHz){
     });
     c.closePath(); c.stroke();
   }
-  c.fillStyle="#3a3a3d";
+  c.fillStyle="#2c2c2e";
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 4.5, 0, 6.2832); c.fill();
   c.strokeStyle="rgba(58,58,61,.45)"; c.lineWidth=1;
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 9, 0, 6.2832); c.stroke();
   c.fillStyle="#8b8b90"; c.font="9px ui-monospace,Menlo,monospace";
-  c.fillText("outline is what you kept · the blue band is "+hitHz+" Hz", 6, H2-6);
+  c.fillText("outline is what you kept · the green band is "+hitHz+" Hz", 6, H2-6);
   const div=document.createElement("div"); div.className="plot"; div.appendChild(cv); return div;
 }
 
