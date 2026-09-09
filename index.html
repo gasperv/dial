@@ -3,22 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#eeecea">
+<meta name="theme-color" content="#dcdee2">
 <title>The Dial</title>
 <style>
   :root{
-    /* soft ceramic: warm neutral greys, no borders anywhere. every edge in
-       this interface is made by elevation or by a change of tone, never by a
-       drawn line. one colour, a deep forest green, and it only means live. */
-    --page:#eeecea; --page-lo:#e7e4e1;
-    --surface:#fbfaf9; --sunk:#e2dfdc; --sunk-lo:#d8d4d0;
-    --hair:#eae7e4;
-    --ink:#3a3735; --dim:#78736e; --faint:#a5a09b;
-    --forest:#2f4f3f; --forest-lo:#3d6350; --forest-hi:#24402f;
-    --rust:#8c5238;
-    --lift-1:0 1px 3px rgba(60,55,50,.05);
-    --lift-2:0 2px 8px rgba(60,55,50,.07);
-    --lift-3:0 18px 40px -22px rgba(60,55,50,.55),0 2px 6px rgba(60,55,50,.06);
+    /* ---- aluminium ----
+       no white anywhere, and nothing near it. the lightest thing on screen is
+       the top of the pad at #eef0f3; the metal itself sits around #e6e8ec and
+       the page below it darker again, so panels read as aluminium lifted off
+       a sheet rather than paper on a lightbox. */
+    --page:#dcdee2; --page-lo:#cfd2d7;
+    --surface:#e6e8ec; --surface-hi:#eef0f3;
+    --sunk:#c8ccd2; --sunk-lo:#bcc1c8;
+    --hair:#d3d6db;
+    --ink:#2b2d30; --dim:#565a5f; --faint:#757a80;   /* 10.3 / 5.2 / 3.2 :1 */
+    --gold:#c19a2e; --gold-lo:#d0aa42; --gold-hi:#a8831f;
+    --gold-dp:#715815;   /* gold ON the ground: text, icons, focus. 4.7:1 */
+    --on-gold:#2e2411;   /* ink ON gold: white only reaches 2.6:1 */
+    --rust:#a63d1f;
+    --lift-1:0 1px 3px rgba(40,44,50,.06);
+    --lift-2:0 2px 8px rgba(40,44,50,.08);
+    --lift-3:0 18px 40px -22px rgba(40,44,50,.6),0 2px 6px rgba(40,44,50,.07);
+
+    /* ---- the golden section ----
+       every size in this file is a step on one of three phi ladders, so the
+       proportions repeat at each scale instead of being chosen one at a time.
+       type climbs by sqrt(phi) (1.272) for a usable number of steps; space
+       and radius climb by phi itself (1.618). */
+    --t-micro:9.9px; --t-small:12.6px; --t-body:16px;
+    --t-h2:20.4px; --t-h1:41.9px; --t-hero:67.8px;
+    --s1:6.2px; --s2:10px; --s3:16.2px; --s4:26.3px; --s5:42.5px;
+    --r1:10px; --r2:16.2px; --r3:26.3px;
+
     --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
     --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,"Segoe UI",Roboto,sans-serif;
     --mono:"SF Mono",Menlo,Monaco,ui-monospace,SFMono-Regular,"Roboto Mono",monospace;
@@ -28,39 +44,48 @@
   body{
     background:linear-gradient(180deg,var(--page) 0%,var(--page-lo) 100%);
     background-attachment:fixed;color:var(--ink);
-    font-family:var(--body);font-size:16px;line-height:1.55;
-    -webkit-font-smoothing:antialiased;padding:18px 16px 48px;
+    font-family:var(--body);font-size:var(--t-body);line-height:1.55;
+    -webkit-font-smoothing:antialiased;padding:var(--s3) var(--s3) var(--s5);
   }
   .wrap{max-width:760px;margin:0 auto}
   #s-result{max-width:560px;margin:0 auto}
-  .eyebrow{font-family:var(--display);font-size:10.5px;font-weight:500;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--faint);margin:0 0 10px}
+  .eyebrow{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 var(--s2)}
   h1{font-family:var(--display);font-weight:250;letter-spacing:-.03em;
-    font-size:38px;line-height:1.06;margin:0 0 14px;color:var(--ink)}
+    font-size:var(--t-h1);line-height:1.06;margin:0 0 var(--s2);color:var(--ink)}
   h2{font-family:var(--display);font-weight:500;letter-spacing:-.012em;
-    font-size:20px;margin:0 0 8px;color:var(--ink)}
-  p{margin:0 0 14px;color:#5c5854}
+    font-size:var(--t-h2);margin:0 0 var(--s1);color:var(--ink)}
+  p{margin:0 0 var(--s2);color:#45484c}
   .quiet{color:var(--dim);font-size:13.5px;line-height:1.5}
-  /* even the rule is a tone change, not a line */
-  .rule{height:1px;background:var(--hair);border:0;margin:26px 0}
+  .rule{height:1px;background:var(--hair);border:0;margin:var(--s4) 0}
   .screen{display:none}
   .screen.on{display:block;animation:fade .5s ease both}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---- the header, which is not part of the rig ---- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+    margin:0 0 var(--s2);padding:0 var(--s1)}
+  .mark{font-family:var(--display);font-size:var(--t-micro);font-weight:500;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+  .iconbtn{background:var(--sunk);border:0;border-radius:var(--r1);color:var(--dim);
+    width:34px;height:34px;display:grid;place-items:center;
+    transition:background .18s,color .18s}
+  .iconbtn:hover{background:var(--sunk-lo);color:var(--ink)}
+  .iconbtn:active{background:var(--gold);color:var(--on-gold)}
 
   /* ================= cabinet ================= */
   /* on the dial the pad IS the frame — no cabinet around a cabinet */
   .cabinet{margin:0;padding:0;background:none;border:0;box-shadow:none}
 
-  /* a pale slab resting on the page. no outline: the shadow is the edge, which
-     is the whole premise of this direction. */
+  /* a milled slab lifted off the page. no outline: the shadow is the edge. */
   .pad{position:relative;margin:0 auto;
     width:min(100%, calc(80vh / 0.94));aspect-ratio:1/0.94;
-    background:radial-gradient(120% 100% at 50% 8%,#fdfdfc 0%,var(--surface) 58%,#f4f2f0 100%);
-    border:0;border-radius:30px;touch-action:none;user-select:none;
+    background:radial-gradient(120% 100% at 50% 8%,var(--surface-hi) 0%,var(--surface) 58%,#dbdde2 100%);
+    border:0;border-radius:var(--r3);touch-action:none;user-select:none;
     cursor:crosshair;overflow:hidden;box-shadow:var(--lift-3)}
   .pad svg{position:absolute;inset:0;width:100%;height:100%}
   .padglow{position:absolute;width:210px;height:210px;margin:-105px 0 0 -105px;
-    background:radial-gradient(closest-side,rgba(47,79,63,.20),rgba(47,79,63,0) 72%);
+    background:radial-gradient(closest-side,rgba(168,131,31,.26),rgba(168,131,31,0) 72%);
     pointer-events:none;transition:opacity .35s;opacity:.18}
   .pad.live .padglow{opacity:1}
   /* the untouched instrument breathes, so it reads as waiting for you */
@@ -77,103 +102,109 @@
   #s-tune.virgin .after{display:none}
   .after{animation:fade .55s ease both}
 
-  .levelrow{display:flex;justify-content:center;align-items:center;margin-top:20px}
+  .levelrow{display:flex;justify-content:center;align-items:center;margin-top:var(--s3)}
   .levels{display:flex;gap:7px;align-items:center}
   .levels i{width:22px;height:3px;background:var(--sunk);display:block;border-radius:2px}
-  .levels i.done{background:#b9b4ae}
-  .levels i.now{background:var(--forest)}
+  .levels i.done{background:#9ba0a7}
+  .levels i.now{background:var(--gold)}
 
   /* ---- the bench ---- */
-  .bench{margin-top:4px}
+  .bench{margin-top:var(--s1)}
   .bench-head{display:flex;justify-content:flex-end}
-  .bench-tog{background:transparent;border:0;padding:10px;line-height:0;color:var(--faint);
+  .bench-tog{background:transparent;border:0;padding:var(--s2);line-height:0;color:var(--faint);
     transition:color .25s}
   .bench-tog:hover{color:var(--dim)}
-  .bench.open .bench-tog{color:var(--forest)}
-  .bench-body{display:none;margin-top:6px;padding-top:18px;border-top:1px solid var(--hair)}
+  .bench.open .bench-tog{color:var(--gold-dp)}
+  .bench-body{display:none;margin-top:var(--s1);padding-top:var(--s3);border-top:1px solid var(--hair)}
   .bench.open .bench-body{display:block}
-  .bench-lab{font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--faint);margin:0 0 11px}
-  .bench-lab.sep{margin-top:22px;padding-top:16px;border-top:1px solid var(--hair)}
-  .bench-pre{display:flex;gap:7px;margin-bottom:14px}
-  /* a soft pill that fills when chosen. no border in either state. */
-  .bench-pre button{flex:1;background:var(--sunk);border:0;border-radius:13px;color:var(--dim);
+  .bench-lab{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 var(--s2)}
+  .bench-lab.sep{margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--hair)}
+  .bench-pre{display:flex;gap:7px;margin-bottom:var(--s2)}
+  /* a soft blank that fills when chosen. no border in either state. */
+  .bench-pre button{flex:1;background:var(--sunk);border:0;border-radius:var(--r1);color:var(--dim);
     font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.1em;
-    text-transform:uppercase;padding:12px 4px;transition:background .18s,color .18s}
+    text-transform:uppercase;padding:var(--s2) 4px;transition:background .18s,color .18s}
   .bench-pre button:hover{background:var(--sunk-lo)}
-  .bench-pre button.on{background:var(--forest);color:#fff}
-  .knob{display:grid;grid-template-columns:98px 1fr 58px;gap:8px 10px;align-items:center;margin-bottom:12px}
+  .bench-pre button.on{background:var(--gold);color:var(--on-gold)}
+  .knob{display:grid;grid-template-columns:98px 1fr 58px;gap:var(--s1) var(--s2);
+    align-items:center;margin-bottom:var(--s2)}
   .knob label{font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.11em;
     text-transform:uppercase;color:var(--dim);line-height:1.25}
-  .knob input[type=range]{width:100%;accent-color:var(--forest);margin:0}
+  .knob input[type=range]{width:100%;accent-color:var(--gold);margin:0}
   .knob .val{font-family:var(--mono);font-size:10.5px;color:var(--dim);text-align:right}
   .knob .val.warn{color:var(--rust)}
   /* the sunk track holds the selected pill — one control, not three buttons */
-  .knob .seg{display:flex;gap:3px;background:var(--sunk);border:0;border-radius:14px;padding:3px}
-  .knob .seg button{flex:1;background:transparent;border:0;border-radius:11px;
+  .knob .seg{display:flex;gap:3px;background:var(--sunk);border:0;border-radius:var(--r2);padding:3px}
+  .knob .seg button{flex:1;background:transparent;border:0;border-radius:13px;
     color:var(--dim);padding:8px 4px;transition:background .18s,color .18s;
     font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.06em}
-  .knob .seg button.on{background:var(--forest);color:#fff}
-  .bench-note{font-family:var(--body);font-size:11.5px;line-height:1.65;color:var(--faint);
-    margin:16px 0 0}
+  .knob .seg button.on{background:var(--gold);color:var(--on-gold)}
+  .benchreset{display:block;width:100%;margin-top:var(--s3);background:transparent;border:0;
+    border-radius:var(--r1);color:var(--dim);font-family:var(--display);font-size:10px;
+    font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:var(--s2);
+    transition:background .18s,color .18s}
+  .benchreset:hover{background:var(--sunk);color:var(--ink)}
+  .bench-note{font-family:var(--body);font-size:var(--t-small);line-height:1.65;color:var(--dim);
+    margin:var(--s3) 0 0}
 
   /* ================= controls ================= */
-  button{font:inherit;color:inherit;cursor:pointer;border-radius:13px}
+  button{font:inherit;color:inherit;cursor:pointer;border-radius:var(--r1)}
   /* the primary action is the only filled thing above the fold */
-  .next{display:block;width:100%;margin-top:20px;border-radius:18px;
-    background:var(--forest);border:0;color:#fff;
+  .next{display:block;width:100%;margin-top:var(--s3);border-radius:var(--r2);
+    background:var(--gold);border:0;color:var(--on-gold);
     font-family:var(--display);font-size:11.5px;font-weight:600;letter-spacing:.18em;
-    text-transform:uppercase;padding:19px;transition:background .18s}
-  .next:hover{background:var(--forest-lo)}
-  .next:active{background:var(--forest-hi)}
-  .ghost{background:var(--sunk);border:0;border-radius:16px;color:var(--dim);
+    text-transform:uppercase;padding:var(--s3);transition:background .18s}
+  .next:hover{background:var(--gold-lo)}
+  .next:active{background:var(--gold-hi)}
+  .ghost{background:var(--sunk);border:0;border-radius:var(--r2);color:var(--dim);
     font-family:var(--display);font-size:10.5px;font-weight:500;letter-spacing:.14em;
-    text-transform:uppercase;padding:16px 12px;transition:background .18s,color .18s}
+    text-transform:uppercase;padding:var(--s3) var(--s2);transition:background .18s,color .18s}
   .ghost:hover{background:var(--sunk-lo);color:var(--ink)}
-  .ghost:active{background:#cfcbc7}
-  .row{display:flex;gap:10px;margin-top:16px}
+  .ghost:active{background:#b2b7bf}
+  .row{display:flex;gap:var(--s2);margin-top:var(--s3)}
   .row > *{flex:1}
-  button:focus-visible,input:focus-visible,.pad:focus-visible{outline:2px solid var(--forest);outline-offset:3px}
+  button:focus-visible,input:focus-visible,.pad:focus-visible{outline:2px solid var(--gold-dp);outline-offset:3px}
 
   /* ================= briefing ================= */
-  .verdict{text-align:center;padding:14px 0 2px}
-  /* ultralight and very large — the number is the whole screen */
-  .hz{font-family:var(--display);font-size:88px;font-weight:250;line-height:1;
+  .verdict{text-align:center;padding:var(--s2) 0 2px}
+  /* ultralight, and phi-cubed above the body size. the number is the screen. */
+  .hz{font-family:var(--display);font-size:var(--t-hero);font-weight:250;line-height:1;
     letter-spacing:-.045em;color:var(--ink);margin:0}
-  .hz span{font-size:21px;font-weight:400;color:var(--faint);letter-spacing:0;margin-left:9px}
+  .hz span{font-size:var(--t-h2);font-weight:400;color:var(--faint);letter-spacing:0;margin-left:9px}
   .named{font-family:var(--display);font-weight:500;letter-spacing:.26em;
-    font-size:15px;color:var(--forest);margin:16px 0 0}
-  .snapline{font-family:var(--body);font-size:13px;color:var(--dim);margin:14px 0 0}
-  .agree{font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--faint);margin:10px 0 0}
-  .plot{margin:16px 0 0;border:0;border-radius:24px;background:var(--surface);padding:5px;
-    box-shadow:var(--lift-2);overflow:hidden}
-  .plot svg,.plot canvas{display:block;width:100%;height:auto;border-radius:20px}
-  .strip-lab{font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--faint);margin:26px 0 8px}
+    font-size:15px;color:var(--gold-dp);margin:var(--s3) 0 0}
+  .snapline{font-family:var(--body);font-size:13px;color:var(--dim);margin:var(--s2) 0 0}
+  .agree{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);margin:var(--s2) 0 0}
+  .plot{margin:var(--s3) 0 0;border:0;border-radius:var(--r3);background:var(--surface);
+    padding:5px;box-shadow:var(--lift-2);overflow:hidden}
+  .plot svg,.plot canvas{display:block;width:100%;height:auto;border-radius:21px}
+  .strip-lab{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);margin:var(--s4) 0 var(--s1)}
   /* a floated panel, the same family as the pad and the plot */
-  .card{border:0;border-radius:22px;padding:6px 20px;margin:24px 0 0;
+  .card{border:0;border-radius:var(--r3);padding:var(--s1) var(--s3);margin:var(--s4) 0 0;
     background:var(--surface);box-shadow:var(--lift-2)}
-  .kv{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--hair);font-size:14px}
+  .kv{display:flex;gap:var(--s2);padding:13px 0;border-bottom:1px solid var(--hair);font-size:14px}
   .kv:last-child{border-bottom:0}
   .kv .k{flex:0 0 84px;font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.13em;
     text-transform:uppercase;color:var(--faint);padding-top:4px}
-  .kv .v{flex:1;color:#4d4945}
-  .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:14px}
-  .key{background:var(--sunk);border:0;border-radius:15px;color:var(--dim);
-    font-family:var(--mono);font-size:13px;padding:17px 4px;transition:background .18s,color .18s}
+  .kv .v{flex:1;color:#3b3e42}
+  .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:var(--s2)}
+  .key{background:var(--sunk);border:0;border-radius:var(--r2);color:var(--dim);
+    font-family:var(--mono);font-size:13px;padding:var(--s3) 4px;transition:background .18s,color .18s}
   .key:hover{background:var(--sunk-lo)}
-  .key.on{background:var(--forest);color:#fff}
+  .key.on{background:var(--gold);color:var(--on-gold)}
   .bgnote{font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.12em;
-    text-transform:uppercase;color:var(--forest);margin:14px 0 0;min-height:14px;
+    text-transform:uppercase;color:var(--gold-dp);margin:var(--s2) 0 0;min-height:14px;
     opacity:0;transition:opacity .3s}
-  .hist{font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.85}
+  .hist{font-family:var(--mono);font-size:var(--t-small);color:var(--dim);line-height:1.85}
   .hist b{color:var(--ink);font-weight:400}
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
-    background:rgba(48,45,42,.93);border:0;border-radius:18px;color:#fff;
+  .toast{position:fixed;left:50%;bottom:var(--s4);transform:translateX(-50%) translateY(20px);
+    background:rgba(38,41,45,.93);border:0;border-radius:var(--r2);color:#fff;
     box-shadow:0 10px 28px -10px rgba(0,0,0,.5);
     font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.1em;
-    text-transform:uppercase;padding:14px 20px;opacity:0;
+    text-transform:uppercase;padding:13px var(--s3);opacity:0;
     transition:opacity .3s,transform .3s;pointer-events:none;z-index:9}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
   @media (prefers-reduced-motion:reduce){
@@ -188,6 +219,16 @@
 
 <!-- ============ THE DIAL ============ -->
 <section class="screen on virgin" id="s-tune">
+  <div class="topbar">
+    <span class="mark">The Dial</span>
+    <button class="iconbtn" id="restart" type="button" title="Start a new sweep" aria-label="Start a new sweep">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none"
+           stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.5 12a8.5 8.5 0 1 1-2.49-6.01"/>
+        <path d="M20.5 4.2V10h-5.8"/>
+      </svg>
+    </button>
+  </div>
   <div class="cabinet">
     <div class="pad idle" id="pad" tabindex="0" role="application" aria-label="Triangulation pad">
       <div class="padglow" id="padglow"></div>
@@ -209,45 +250,45 @@
             <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wearmask)"/>
           </mask>
           <radialGradient id="heatg">
-            <stop offset="0%" stop-color="#2f4f3f" stop-opacity=".34"/>
-            <stop offset="60%" stop-color="#2f4f3f" stop-opacity=".11"/>
-            <stop offset="100%" stop-color="#2f4f3f" stop-opacity="0"/>
+            <stop offset="0%" stop-color="#a8831f" stop-opacity=".34"/>
+            <stop offset="60%" stop-color="#a8831f" stop-opacity=".11"/>
+            <stop offset="100%" stop-color="#a8831f" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <g id="tri-g">
           <g id="tri-cold">
             <g id="patina" clip-path="url(#cp-tri)">
               <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wear)"/>
-              <g id="tri-lat-worn" mask="url(#wearm)" stroke="rgba(90,84,78,.13)"
+              <g id="tri-lat-worn" mask="url(#wearm)" stroke="rgba(58,63,70,.13)"
                  stroke-width="0.13" vector-effect="non-scaling-stroke"></g>
             </g>
             <polygon id="tri-out" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
-                     stroke="#e0dcd8" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
-            <g id="tri-lat" stroke="rgba(90,84,78,.13)" stroke-width="0.13"
+                     stroke="#bcc0c6" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
+            <g id="tri-lat" stroke="rgba(58,63,70,.13)" stroke-width="0.13"
                vector-effect="non-scaling-stroke"></g>
             <!-- the outline lights up as you cover ground: full circuit = you may rest -->
             <!-- dash lengths must live in user units, so no non-scaling-stroke here -->
             <polygon id="tri-charge" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
-                     stroke="#2f4f3f" stroke-width="0.55" stroke-linejoin="round" opacity="0"/>
+                     stroke="#a8831f" stroke-width="0.55" stroke-linejoin="round" opacity="0"/>
           </g>
           <g id="heat" opacity="0"></g>
-          <polygon id="tri-sub" fill="none" stroke="#2f4f3f" stroke-width="0.36"
+          <polygon id="tri-sub" fill="none" stroke="#a8831f" stroke-width="0.36"
                    vector-effect="non-scaling-stroke" opacity="0"/>
           <g id="hands" clip-path="url(#cp-tri)">
-            <line id="ln-a" stroke="rgba(90,84,78,.30)" stroke-width="0.34"
+            <line id="ln-a" stroke="rgba(58,63,70,.28)" stroke-width="0.34"
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-            <line id="ln-b" stroke="rgba(90,84,78,.30)" stroke-width="0.34"
+            <line id="ln-b" stroke="rgba(58,63,70,.28)" stroke-width="0.34"
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-            <line id="ln-c" stroke="rgba(90,84,78,.30)" stroke-width="0.34"
+            <line id="ln-c" stroke="rgba(58,63,70,.28)" stroke-width="0.34"
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
           </g>
         </g>
-        <circle id="v-a" r="0.9" fill="#cfcac5"/>
-        <circle id="v-b" r="0.9" fill="#cfcac5"/>
-        <circle id="v-c" r="0.9" fill="#cfcac5"/>
-        <circle id="puck" r="1.5" fill="#3a3735"/>
+        <circle id="v-a" r="0.9" fill="#a4a9b1"/>
+        <circle id="v-b" r="0.9" fill="#a4a9b1"/>
+        <circle id="v-c" r="0.9" fill="#a4a9b1"/>
+        <circle id="puck" r="1.5" fill="#2b2d30"/>
         <!-- holding still closes a ring around the point; closed = committed -->
-        <circle id="hold-ring" r="6.2" fill="none" stroke="#2f4f3f" stroke-width="0.55"
+        <circle id="hold-ring" r="6.2" fill="none" stroke="#a8831f" stroke-width="0.55"
                 stroke-linecap="round" opacity="0"/>
       </svg>
     </div>
@@ -286,7 +327,7 @@
           <input type="range" id="k-ze" min="55" max="170" step="1" value="104">
           <span class="val" id="v-ze">&zeta; 1.04</span></div>
         <div class="knob"><label for="k-ge">Gearing</label>
-          <input type="range" id="k-ge" min="15" max="130" step="1" value="72">
+          <input type="range" id="k-ge" min="30" max="130" step="1" value="72">
           <span class="val" id="v-ge">.72</span></div>
         <div class="knob"><label for="k-dr">Coast</label>
           <input type="range" id="k-dr" min="5" max="90" step="1" value="19">
@@ -323,6 +364,7 @@
         <div class="knob"><label>Scramble</label>
           <div class="seg" id="seg-scr"><button data-v="1">Gentle</button><button data-v="2" class="on">Normal</button><button data-v="4">Wild</button></div>
           <span class="val">&nbsp;</span></div>
+        <button class="benchreset" id="bench-reset" type="button">Reset the bench</button>
         <p class="bench-note">Damping under 1.00 lets the arms ring. Everything here applies live and is remembered. Terrain changes take effect on the next sweep. Levelling corrects for what a phone speaker cannot reproduce, so the tones sit at one loudness and you pick by feel rather than by volume — it makes the top of the range much quieter, so turn the phone up. On headphones set Playing on to Headphones.</p>
       </div>
     </div>
@@ -434,6 +476,12 @@ let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:1, spk:true, bal:1};
 const NARROWINGS=1;                 /* sweep, then the plane. that is the whole app. */
 /* the whole feel of the instrument, live-editable from the bench under the dial */
 let feel={omega:8.0, zeta:1.04, gear:0.72, drag:1.9, smooth:0.050, fr:4.4, scan:0.68};
+/* the bench can be dragged into a state where the instrument barely answers:
+   gearing at its floor alone costs 4.8x of the response, and stacked with mass
+   at minimum and smoothing at maximum the dial reads as broken. these are the
+   way back, and nothing may mutate them. */
+const FEEL0=JSON.parse(JSON.stringify(feel));
+const CFG0=JSON.parse(JSON.stringify(cfg));
 const PRESET={
   light:   {omega:14.0, zeta:0.98, gear:1.30, drag:4.8, smooth:0.026, fr:11.0},
   weighted:{omega:10.5, zeta:1.01, gear:1.00, drag:3.0, smooth:0.038, fr: 6.8},
@@ -1169,7 +1217,14 @@ function gearNow(){ return feel.gear/Math.max(0.05,dispScale); }
 let hinted=false;
 padEl.addEventListener("pointerdown", e=>{
   if(trans) return;
-  padEl.setPointerCapture(e.pointerId); primeAudio();
+  /* claim the drag first. setPointerCapture throws on a stale pointer id and
+     primeAudio touches an audio session the browser can refuse — either one
+     throwing used to skip the assignments below and leave the dial dead. */
+  dragging=true; engaged=true;
+  grabX=e.clientX; grabY=e.clientY;
+  rtx=ptx; rty=pty; tvx=0; tvy=0;
+  try{ padEl.setPointerCapture(e.pointerId); }catch(err){}
+  try{ primeAudio(); }catch(err){}
   /* if the touch-down could not buy activation, say so once rather than
      letting the instrument read as broken for one sweep */
   if(!audioReady&&!hinted&&e.pointerType!=="mouse") setTimeout(()=>{
@@ -1178,9 +1233,6 @@ padEl.addEventListener("pointerdown", e=>{
   },350);
   padEl.classList.remove("idle");
   $("#s-tune").classList.remove("virgin");
-  dragging=true; engaged=true;
-  grabX=e.clientX; grabY=e.clientY;
-  rtx=ptx; rty=pty; tvx=0; tvy=0;
   sound(curFreq()); lastMove=performance.now();
 });
 padEl.addEventListener("pointermove", e=>{
@@ -1405,28 +1457,28 @@ function triPlot(r, hitHz){
   for(let j=0;j<H2;j++){
     for(let k=0;k<W2;k++){
       const x=k/(W2-1), y=j/(H2-1), o=(j*W2+k)*4;
-      if(!insideTri([x,y])){ dat[o]=238;dat[o+1]=236;dat[o+2]=234;dat[o+3]=255; continue; }
+      if(!insideTri([x,y])){ dat[o]=208;dat[o+1]=211;dat[o+2]=216;dat[o+3]=255; continue; }
       const v=fieldAt(r.field,x,y);
       /* paper, darkening as the terrain climbs */
-      let rr=251-v*46, gg=250-v*46, bb=249-v*46;
+      let rr=232-v*44, gg=234-v*44, bb=238-v*44;
       let best=1e9;
       for(let n=0;n<TONES.length;n++){
         const d=Math.abs(v-posOf(TONES[n].f));
         if(d<best) best=d;
       }
       const near=Math.abs(v-hitPos);
-      if(near<0.012){ const a=1-near/0.012; rr+=(47-rr)*a; gg+=(79-gg)*a; bb+=(63-bb)*a; }
-      else if(best<0.006){ const a=1-best/0.006; rr+=(206-rr)*a; gg+=(202-gg)*a; bb+=(198-bb)*a; }
+      if(near<0.012){ const a=1-near/0.012; rr+=(168-rr)*a; gg+=(131-gg)*a; bb+=(31-bb)*a; }
+      else if(best<0.006){ const a=1-best/0.006; rr+=(176-rr)*a; gg+=(181-gg)*a; bb+=(188-bb)*a; }
       dat[o]=rr|0; dat[o+1]=gg|0; dat[o+2]=bb|0; dat[o+3]=255;
     }
   }
   c.putImageData(img,0,0);
-  c.strokeStyle="#e0dcd8"; c.lineWidth=1;
+  c.strokeStyle="#bcc0c6"; c.lineWidth=1;
   c.beginPath();
   c.moveTo(VA[0]*W2,VA[1]*H2); c.lineTo(VB[0]*W2,VB[1]*H2); c.lineTo(VC[0]*W2,VC[1]*H2); c.closePath();
   c.stroke();
   if(r.vs<0.995){
-    c.strokeStyle="#2f4f3f"; c.lineWidth=1.4;
+    c.strokeStyle="#a8831f"; c.lineWidth=1.4;
     c.beginPath();
     TRI_V.forEach(function(v,n){
       const px=(r.vc[0]+r.vs*(v[0]-TRIC[0]))*W2, py=(r.vc[1]+r.vs*(v[1]-TRIC[1]))*H2;
@@ -1434,12 +1486,12 @@ function triPlot(r, hitHz){
     });
     c.closePath(); c.stroke();
   }
-  c.fillStyle="#3a3735";
+  c.fillStyle="#2b2d30";
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 4.5, 0, 6.2832); c.fill();
-  c.strokeStyle="rgba(90,84,78,.38)"; c.lineWidth=1;
+  c.strokeStyle="rgba(58,63,70,.36)"; c.lineWidth=1;
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 9, 0, 6.2832); c.stroke();
-  c.fillStyle="#a5a09b"; c.font="9px ui-monospace,Menlo,monospace";
-  c.fillText("outline is what you kept · the green band is "+hitHz+" Hz", 13, H2-10);
+  c.fillStyle="#757a80"; c.font="9px ui-monospace,Menlo,monospace";
+  c.fillText("outline is what you kept · the gold band is "+hitHz+" Hz", 13, H2-10);
   const div=document.createElement("div"); div.className="plot"; div.appendChild(cv); return div;
 }
 
@@ -1535,6 +1587,14 @@ $("#bench-pre").addEventListener("click", e=>{
   afterFeel();
 });
 $("#bench-tog").addEventListener("click", ()=>{ $("#bench").classList.toggle("open"); });
+$("#restart").addEventListener("click", ()=>{ newSitting(); toast("New terrain"); });
+$("#bench-reset").addEventListener("click", ()=>{
+  Object.keys(FEEL0).forEach(k=>{ feel[k]=FEEL0[k]; });
+  Object.keys(CFG0).forEach(k=>{ cfg[k]=CFG0[k]; });
+  PMIN=null; afterFeel();
+  if(sounding&&osc) applyVoice(curFreq(),0.08);
+  toast("Bench back to default");
+});
 
 /* ================= history =================
    window.storage exists inside Claude; anywhere else (GitHub Pages, a file on
