@@ -3,39 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#dcdee2">
+<meta name="theme-color" content="#dcc7b6">
 <title>The Dial</title>
 <style>
   :root{
-    /* ---- aluminium ----
-       no white anywhere, and nothing near it. the lightest thing on screen is
-       the top of the pad at #eef0f3; the metal itself sits around #e6e8ec and
-       the page below it darker again, so panels read as aluminium lifted off
-       a sheet rather than paper on a lightbox. */
-    --page:#dcdee2; --page-lo:#cfd2d7;
-    --surface:#e6e8ec; --surface-hi:#eef0f3;
-    --sunk:#c8ccd2; --sunk-lo:#bcc1c8;
-    --hair:#d3d6db;
-    --ink:#2b2d30; --dim:#565a5f; --faint:#757a80;   /* 10.3 / 5.2 / 3.2 :1 */
-    --gold:#c19a2e; --gold-lo:#d0aa42; --gold-hi:#a8831f;
-    --gold-dp:#715815;   /* gold ON the ground: text, icons, focus. 4.7:1 */
-    --on-gold:#2e2411;   /* ink ON gold: white only reaches 2.6:1 */
-    --rust:#a63d1f;
-    --lift-1:0 1px 3px rgba(40,44,50,.06);
-    --lift-2:0 2px 8px rgba(40,44,50,.08);
-    --lift-3:0 18px 40px -22px rgba(40,44,50,.6),0 2px 6px rgba(40,44,50,.07);
+    /* ---- clay & cream ----
+       the page itself carries colour: a clay ground with cream panels floating
+       on it. a mid-toned ground is unforgiving — it takes contrast off dark and
+       light text at the same time — so every value here was solved against the
+       LIGHT end of the clay gradient, which is the worst case for dark ink. */
+    --page:#dcc7b6; --page-lo:#cbb09c;
+    --surface:#f8f1eb; --pad-hi:#fbf5f0; --pad-mid:#f6ede5; --pad-lo:#efe2d7;
+    --sunk:#e9dad0; --sunk-lo:#ddc9bb;
+    --hair:#eee1d7;
+    --ink:#3a2a20; --dim:#634638; --faint:#856046;   /* 8.4 / 5.2 / 3.4 :1 on clay */
+    --gold:#c48c30;      /* the fill. lighter than the ground, so it catches. */
+    --gold-lo:#d09a3d; --gold-hi:#ad7823;
+    --gold-dp:#714611;   /* gold as text or line on the ground. 5.0:1 */
+    --on-gold:#2b1d08;   /* ink on the gold fill. 5.6:1 */
+    --deep:#4a3225; --deep-lo:#5c4030;   /* the primary action */
+    --on-deep:#f3e3d3;
+    --rust:#9c3517;
+    --lift-1:0 1px 3px rgba(80,52,34,.07);
+    --lift-2:0 2px 8px rgba(80,52,34,.10);
+    --lift-3:0 16px 34px -18px rgba(80,52,34,.55),0 2px 5px rgba(80,52,34,.10);
 
     /* ---- the golden section ----
-       every size in this file is a step on one of three phi ladders, so the
-       proportions repeat at each scale instead of being chosen one at a time.
-       type climbs by sqrt(phi) (1.272) for a usable number of steps; space
-       and radius climb by phi itself (1.618). */
+       type climbs by sqrt(phi) (1.272), space and radius by phi (1.618), so the
+       proportions repeat at every scale instead of being chosen one at a time. */
     --t-micro:9.9px; --t-small:12.6px; --t-body:16px;
     --t-h2:20.4px; --t-h1:41.9px; --t-hero:67.8px;
     --s1:6.2px; --s2:10px; --s3:16.2px; --s4:26.3px; --s5:42.5px;
     --r1:10px; --r2:16.2px; --r3:26.3px;
 
-    --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+    /* the readout is set in a book serif — an almanac, not a system panel.
+       Iowan and Palatino ship on iOS and macOS; Georgia catches everything else. */
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
     --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,"Segoe UI",Roboto,sans-serif;
     --mono:"SF Mono",Menlo,Monaco,ui-monospace,SFMono-Regular,"Roboto Mono",monospace;
   }
@@ -49,13 +52,13 @@
   }
   .wrap{max-width:760px;margin:0 auto}
   #s-result{max-width:560px;margin:0 auto}
-  .eyebrow{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.2em;
+  .eyebrow{font-family:var(--body);font-size:var(--t-micro);font-weight:500;letter-spacing:.2em;
     text-transform:uppercase;color:var(--faint);margin:0 0 var(--s2)}
-  h1{font-family:var(--display);font-weight:250;letter-spacing:-.03em;
-    font-size:var(--t-h1);line-height:1.06;margin:0 0 var(--s2);color:var(--ink)}
-  h2{font-family:var(--display);font-weight:500;letter-spacing:-.012em;
+  h1{font-family:var(--display);font-weight:400;letter-spacing:-.005em;
+    font-size:var(--t-h1);line-height:1.08;margin:0 0 var(--s2);color:var(--ink)}
+  h2{font-family:var(--display);font-weight:400;letter-spacing:0;
     font-size:var(--t-h2);margin:0 0 var(--s1);color:var(--ink)}
-  p{margin:0 0 var(--s2);color:#45484c}
+  p{margin:0 0 var(--s2);color:#4c382c}
   .quiet{color:var(--dim);font-size:13.5px;line-height:1.5}
   .rule{height:1px;background:var(--hair);border:0;margin:var(--s4) 0}
   .screen{display:none}
@@ -68,11 +71,11 @@
   .topbar{position:relative;display:flex;align-items:center;justify-content:center;
     margin:0 0 var(--s2);padding:0 var(--s1);min-height:34px}
   .mark{position:absolute;left:var(--s1);top:50%;transform:translateY(-50%);
-    font-family:var(--display);font-size:var(--t-micro);font-weight:500;
+    font-family:var(--body);font-size:var(--t-micro);font-weight:500;
     letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
   .iconbtn{background:var(--sunk);border:0;border-radius:var(--r1);color:var(--dim);
     width:34px;height:34px;display:grid;place-items:center;
-    transition:background .18s,color .18s}
+    box-shadow:var(--lift-1);transition:background .18s,color .18s}
   .iconbtn:hover{background:var(--sunk-lo);color:var(--ink)}
   .iconbtn:active{background:var(--gold);color:var(--on-gold)}
 
@@ -80,15 +83,15 @@
   /* on the dial the pad IS the frame — no cabinet around a cabinet */
   .cabinet{margin:0;padding:0;background:none;border:0;box-shadow:none}
 
-  /* a milled slab lifted off the page. no outline: the shadow is the edge. */
+  /* a cream plate floating on the clay. no outline: the shadow is the edge. */
   .pad{position:relative;margin:0 auto;
     width:min(100%, calc(80vh / 0.94));aspect-ratio:1/0.94;
-    background:radial-gradient(120% 100% at 50% 8%,var(--surface-hi) 0%,var(--surface) 58%,#dbdde2 100%);
+    background:radial-gradient(120% 100% at 50% 8%,var(--pad-hi) 0%,var(--pad-mid) 58%,var(--pad-lo) 100%);
     border:0;border-radius:var(--r3);touch-action:none;user-select:none;
     cursor:crosshair;overflow:hidden;box-shadow:var(--lift-3)}
   .pad svg{position:absolute;inset:0;width:100%;height:100%}
   .padglow{position:absolute;width:210px;height:210px;margin:-105px 0 0 -105px;
-    background:radial-gradient(closest-side,rgba(168,131,31,.26),rgba(168,131,31,0) 72%);
+    background:radial-gradient(closest-side,rgba(168,114,31,.24),rgba(168,114,31,0) 72%);
     pointer-events:none;transition:opacity .35s;opacity:.18}
   .pad.live .padglow{opacity:1}
   /* the untouched instrument breathes, so it reads as waiting for you */
@@ -107,9 +110,9 @@
 
   .levelrow{display:flex;justify-content:center;align-items:center;margin-top:var(--s3)}
   .levels{display:flex;gap:7px;align-items:center}
-  .levels i{width:22px;height:3px;background:var(--sunk);display:block;border-radius:2px}
-  .levels i.done{background:#9ba0a7}
-  .levels i.now{background:var(--gold)}
+  .levels i{width:22px;height:3px;background:var(--sunk-lo);display:block;border-radius:2px}
+  .levels i.done{background:#b2947c}
+  .levels i.now{background:var(--gold-dp)}
 
   /* ---- the bench ---- */
   .bench{margin-top:var(--s1)}
@@ -118,33 +121,36 @@
     transition:color .25s}
   .bench-tog:hover{color:var(--dim)}
   .bench.open .bench-tog{color:var(--gold-dp)}
-  .bench-body{display:none;margin-top:var(--s1);padding-top:var(--s3);border-top:1px solid var(--hair)}
+  .bench-body{display:none;margin-top:var(--s1);padding-top:var(--s3);
+    border-top:1px solid rgba(74,50,37,.18)}
   .bench.open .bench-body{display:block}
-  .bench-lab{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.18em;
+  .bench-lab{font-family:var(--body);font-size:var(--t-micro);font-weight:500;letter-spacing:.18em;
     text-transform:uppercase;color:var(--faint);margin:0 0 var(--s2)}
-  .bench-lab.sep{margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--hair)}
+  .bench-lab.sep{margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid rgba(74,50,37,.18)}
   .bench-pre{display:flex;gap:7px;margin-bottom:var(--s2)}
-  /* a soft blank that fills when chosen. no border in either state. */
+  /* a cream blank that fills with gold when chosen. no border in either state. */
   .bench-pre button{flex:1;background:var(--sunk);border:0;border-radius:var(--r1);color:var(--dim);
-    font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.1em;
-    text-transform:uppercase;padding:var(--s2) 4px;transition:background .18s,color .18s}
+    font-family:var(--body);font-size:10px;font-weight:500;letter-spacing:.1em;
+    text-transform:uppercase;padding:var(--s2) 4px;box-shadow:var(--lift-1);
+    transition:background .18s,color .18s}
   .bench-pre button:hover{background:var(--sunk-lo)}
-  .bench-pre button.on{background:var(--gold);color:var(--on-gold)}
+  .bench-pre button.on{background:var(--gold);color:var(--on-gold);box-shadow:none}
   .knob{display:grid;grid-template-columns:98px 1fr 58px;gap:var(--s1) var(--s2);
     align-items:center;margin-bottom:var(--s2)}
-  .knob label{font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.11em;
+  .knob label{font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.11em;
     text-transform:uppercase;color:var(--dim);line-height:1.25}
-  .knob input[type=range]{width:100%;accent-color:var(--gold);margin:0}
+  .knob input[type=range]{width:100%;accent-color:var(--gold-dp);margin:0}
   .knob .val{font-family:var(--mono);font-size:10.5px;color:var(--dim);text-align:right}
   .knob .val.warn{color:var(--rust)}
   /* the sunk track holds the selected pill — one control, not three buttons */
-  .knob .seg{display:flex;gap:3px;background:var(--sunk);border:0;border-radius:var(--r2);padding:3px}
+  .knob .seg{display:flex;gap:3px;background:var(--sunk);border:0;border-radius:var(--r2);
+    padding:3px;box-shadow:var(--lift-1)}
   .knob .seg button{flex:1;background:transparent;border:0;border-radius:13px;
     color:var(--dim);padding:8px 4px;transition:background .18s,color .18s;
-    font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.06em}
+    font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.06em}
   .knob .seg button.on{background:var(--gold);color:var(--on-gold)}
   .benchreset{display:block;width:100%;margin-top:var(--s3);background:transparent;border:0;
-    border-radius:var(--r1);color:var(--dim);font-family:var(--display);font-size:10px;
+    border-radius:var(--r1);color:var(--dim);font-family:var(--body);font-size:10px;
     font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:var(--s2);
     transition:background .18s,color .18s}
   .benchreset:hover{background:var(--sunk);color:var(--ink)}
@@ -153,60 +159,65 @@
 
   /* ================= controls ================= */
   button{font:inherit;color:inherit;cursor:pointer;border-radius:var(--r1)}
-  /* the primary action is the only filled thing above the fold */
+  /* the primary action is the darkest thing on the page; gold is reserved for
+     what is currently live, so the two never compete */
   .next{display:block;width:100%;margin-top:var(--s3);border-radius:var(--r2);
-    background:var(--gold);border:0;color:var(--on-gold);
-    font-family:var(--display);font-size:11.5px;font-weight:600;letter-spacing:.18em;
-    text-transform:uppercase;padding:var(--s3);transition:background .18s}
-  .next:hover{background:var(--gold-lo)}
-  .next:active{background:var(--gold-hi)}
+    background:var(--deep);border:0;color:var(--on-deep);
+    font-family:var(--body);font-size:11.5px;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;padding:var(--s3);box-shadow:var(--lift-2);
+    transition:background .18s}
+  .next:hover{background:var(--deep-lo)}
+  .next:active{background:#3b271c}
   .ghost{background:var(--sunk);border:0;border-radius:var(--r2);color:var(--dim);
-    font-family:var(--display);font-size:10.5px;font-weight:500;letter-spacing:.14em;
-    text-transform:uppercase;padding:var(--s3) var(--s2);transition:background .18s,color .18s}
+    font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.14em;
+    text-transform:uppercase;padding:var(--s3) var(--s2);box-shadow:var(--lift-1);
+    transition:background .18s,color .18s}
   .ghost:hover{background:var(--sunk-lo);color:var(--ink)}
-  .ghost:active{background:#b2b7bf}
+  .ghost:active{background:#d3bdad}
   .row{display:flex;gap:var(--s2);margin-top:var(--s3)}
   .row > *{flex:1}
   button:focus-visible,input:focus-visible,.pad:focus-visible{outline:2px solid var(--gold-dp);outline-offset:3px}
 
   /* ================= briefing ================= */
   .verdict{text-align:center;padding:var(--s2) 0 2px}
-  /* ultralight, and phi-cubed above the body size. the number is the screen. */
-  .hz{font-family:var(--display);font-size:var(--t-hero);font-weight:250;line-height:1;
-    letter-spacing:-.045em;color:var(--ink);margin:0}
-  .hz span{font-size:var(--t-h2);font-weight:400;color:var(--faint);letter-spacing:0;margin-left:9px}
-  .named{font-family:var(--display);font-weight:500;letter-spacing:.26em;
-    font-size:15px;color:var(--gold-dp);margin:var(--s3) 0 0}
+  /* the readout in book serif, phi-cubed above the body size */
+  .hz{font-family:var(--display);font-size:var(--t-hero);font-weight:400;line-height:1;
+    letter-spacing:-.012em;color:var(--ink);margin:0}
+  .hz span{font-family:var(--body);font-size:var(--t-h2);font-weight:400;color:var(--faint);
+    letter-spacing:0;margin-left:9px}
+  .named{font-family:var(--display);font-weight:400;letter-spacing:.22em;
+    font-size:17px;color:var(--gold-dp);margin:var(--s3) 0 0}
   .snapline{font-family:var(--body);font-size:13px;color:var(--dim);margin:var(--s2) 0 0}
-  .agree{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.14em;
+  .agree{font-family:var(--body);font-size:var(--t-micro);font-weight:500;letter-spacing:.14em;
     text-transform:uppercase;color:var(--faint);margin:var(--s2) 0 0}
   .plot{margin:var(--s3) 0 0;border:0;border-radius:var(--r3);background:var(--surface);
     padding:5px;box-shadow:var(--lift-2);overflow:hidden}
   .plot svg,.plot canvas{display:block;width:100%;height:auto;border-radius:21px}
-  .strip-lab{font-family:var(--display);font-size:var(--t-micro);font-weight:500;letter-spacing:.14em;
+  .strip-lab{font-family:var(--body);font-size:var(--t-micro);font-weight:500;letter-spacing:.14em;
     text-transform:uppercase;color:var(--faint);margin:var(--s4) 0 var(--s1)}
-  /* a floated panel, the same family as the pad and the plot */
+  /* a cream panel, the same family as the pad and the plot */
   .card{border:0;border-radius:var(--r3);padding:var(--s1) var(--s3);margin:var(--s4) 0 0;
     background:var(--surface);box-shadow:var(--lift-2)}
   .kv{display:flex;gap:var(--s2);padding:13px 0;border-bottom:1px solid var(--hair);font-size:14px}
   .kv:last-child{border-bottom:0}
-  .kv .k{flex:0 0 84px;font-family:var(--display);font-size:9.5px;font-weight:500;letter-spacing:.13em;
-    text-transform:uppercase;color:var(--faint);padding-top:4px}
-  .kv .v{flex:1;color:#3b3e42}
+  .kv .k{flex:0 0 84px;font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.13em;
+    text-transform:uppercase;color:#9a7358;padding-top:4px}
+  .kv .v{flex:1;color:#453227}
   .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:var(--s2)}
   .key{background:var(--sunk);border:0;border-radius:var(--r2);color:var(--dim);
-    font-family:var(--mono);font-size:13px;padding:var(--s3) 4px;transition:background .18s,color .18s}
+    font-family:var(--mono);font-size:13px;padding:var(--s3) 4px;box-shadow:var(--lift-1);
+    transition:background .18s,color .18s}
   .key:hover{background:var(--sunk-lo)}
-  .key.on{background:var(--gold);color:var(--on-gold)}
-  .bgnote{font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.12em;
+  .key.on{background:var(--gold);color:var(--on-gold);box-shadow:none}
+  .bgnote{font-family:var(--body);font-size:10px;font-weight:500;letter-spacing:.12em;
     text-transform:uppercase;color:var(--gold-dp);margin:var(--s2) 0 0;min-height:14px;
     opacity:0;transition:opacity .3s}
   .hist{font-family:var(--mono);font-size:var(--t-small);color:var(--dim);line-height:1.85}
   .hist b{color:var(--ink);font-weight:400}
   .toast{position:fixed;left:50%;bottom:var(--s4);transform:translateX(-50%) translateY(20px);
-    background:rgba(38,41,45,.93);border:0;border-radius:var(--r2);color:#fff;
-    box-shadow:0 10px 28px -10px rgba(0,0,0,.5);
-    font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.1em;
+    background:rgba(58,42,32,.94);border:0;border-radius:var(--r2);color:var(--on-deep);
+    box-shadow:0 10px 28px -10px rgba(50,32,20,.55);
+    font-family:var(--body);font-size:11px;font-weight:500;letter-spacing:.1em;
     text-transform:uppercase;padding:13px var(--s3);opacity:0;
     transition:opacity .3s,transform .3s;pointer-events:none;z-index:9}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -253,45 +264,45 @@
             <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wearmask)"/>
           </mask>
           <radialGradient id="heatg">
-            <stop offset="0%" stop-color="#a8831f" stop-opacity=".34"/>
-            <stop offset="60%" stop-color="#a8831f" stop-opacity=".11"/>
-            <stop offset="100%" stop-color="#a8831f" stop-opacity="0"/>
+            <stop offset="0%" stop-color="#a8721f" stop-opacity=".34"/>
+            <stop offset="60%" stop-color="#a8721f" stop-opacity=".11"/>
+            <stop offset="100%" stop-color="#a8721f" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <g id="tri-g">
           <g id="tri-cold">
             <g id="patina" clip-path="url(#cp-tri)">
               <ellipse cx="50" cy="63" rx="31" ry="18" fill="url(#wear)"/>
-              <g id="tri-lat-worn" mask="url(#wearm)" stroke="rgba(58,63,70,.13)"
+              <g id="tri-lat-worn" mask="url(#wearm)" stroke="rgba(94,62,42,.13)"
                  stroke-width="0.13" vector-effect="non-scaling-stroke"></g>
             </g>
             <polygon id="tri-out" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
-                     stroke="#bcc0c6" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
-            <g id="tri-lat" stroke="rgba(58,63,70,.13)" stroke-width="0.13"
+                     stroke="#e0cebe" stroke-width="0.24" vector-effect="non-scaling-stroke"/>
+            <g id="tri-lat" stroke="rgba(94,62,42,.13)" stroke-width="0.13"
                vector-effect="non-scaling-stroke"></g>
             <!-- the outline lights up as you cover ground: full circuit = you may rest -->
             <!-- dash lengths must live in user units, so no non-scaling-stroke here -->
             <polygon id="tri-charge" points="50,6.58 6.6,88.36 93.4,88.36" fill="none"
-                     stroke="#a8831f" stroke-width="0.55" stroke-linejoin="round" opacity="0"/>
+                     stroke="#a8721f" stroke-width="0.55" stroke-linejoin="round" opacity="0"/>
           </g>
           <g id="heat" opacity="0"></g>
-          <polygon id="tri-sub" fill="none" stroke="#a8831f" stroke-width="0.36"
+          <polygon id="tri-sub" fill="none" stroke="#a8721f" stroke-width="0.36"
                    vector-effect="non-scaling-stroke" opacity="0"/>
           <g id="hands" clip-path="url(#cp-tri)">
-            <line id="ln-a" stroke="rgba(58,63,70,.28)" stroke-width="0.34"
+            <line id="ln-a" stroke="rgba(94,62,42,.26)" stroke-width="0.34"
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-            <line id="ln-b" stroke="rgba(58,63,70,.28)" stroke-width="0.34"
+            <line id="ln-b" stroke="rgba(94,62,42,.26)" stroke-width="0.34"
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-            <line id="ln-c" stroke="rgba(58,63,70,.28)" stroke-width="0.34"
+            <line id="ln-c" stroke="rgba(94,62,42,.26)" stroke-width="0.34"
                   stroke-linecap="round" vector-effect="non-scaling-stroke"/>
           </g>
         </g>
-        <circle id="v-a" r="0.9" fill="#a4a9b1"/>
-        <circle id="v-b" r="0.9" fill="#a4a9b1"/>
-        <circle id="v-c" r="0.9" fill="#a4a9b1"/>
-        <circle id="puck" r="1.5" fill="#2b2d30"/>
+        <circle id="v-a" r="0.9" fill="#cfb69f"/>
+        <circle id="v-b" r="0.9" fill="#cfb69f"/>
+        <circle id="v-c" r="0.9" fill="#cfb69f"/>
+        <circle id="puck" r="1.5" fill="#3a2a20"/>
         <!-- holding still closes a ring around the point; closed = committed -->
-        <circle id="hold-ring" r="6.2" fill="none" stroke="#a8831f" stroke-width="0.55"
+        <circle id="hold-ring" r="6.2" fill="none" stroke="#a8721f" stroke-width="0.55"
                 stroke-linecap="round" opacity="0"/>
       </svg>
     </div>
@@ -1460,28 +1471,28 @@ function triPlot(r, hitHz){
   for(let j=0;j<H2;j++){
     for(let k=0;k<W2;k++){
       const x=k/(W2-1), y=j/(H2-1), o=(j*W2+k)*4;
-      if(!insideTri([x,y])){ dat[o]=208;dat[o+1]=211;dat[o+2]=216;dat[o+3]=255; continue; }
+      if(!insideTri([x,y])){ dat[o]=220;dat[o+1]=199;dat[o+2]=182;dat[o+3]=255; continue; }
       const v=fieldAt(r.field,x,y);
       /* paper, darkening as the terrain climbs */
-      let rr=232-v*44, gg=234-v*44, bb=238-v*44;
+      let rr=250-v*42, gg=241-v*44, bb=231-v*46;
       let best=1e9;
       for(let n=0;n<TONES.length;n++){
         const d=Math.abs(v-posOf(TONES[n].f));
         if(d<best) best=d;
       }
       const near=Math.abs(v-hitPos);
-      if(near<0.012){ const a=1-near/0.012; rr+=(168-rr)*a; gg+=(131-gg)*a; bb+=(31-bb)*a; }
-      else if(best<0.006){ const a=1-best/0.006; rr+=(176-rr)*a; gg+=(181-gg)*a; bb+=(188-bb)*a; }
+      if(near<0.012){ const a=1-near/0.012; rr+=(168-rr)*a; gg+=(114-gg)*a; bb+=(31-bb)*a; }
+      else if(best<0.006){ const a=1-best/0.006; rr+=(220-rr)*a; gg+=(202-gg)*a; bb+=(184-bb)*a; }
       dat[o]=rr|0; dat[o+1]=gg|0; dat[o+2]=bb|0; dat[o+3]=255;
     }
   }
   c.putImageData(img,0,0);
-  c.strokeStyle="#bcc0c6"; c.lineWidth=1;
+  c.strokeStyle="#e0cebe"; c.lineWidth=1;
   c.beginPath();
   c.moveTo(VA[0]*W2,VA[1]*H2); c.lineTo(VB[0]*W2,VB[1]*H2); c.lineTo(VC[0]*W2,VC[1]*H2); c.closePath();
   c.stroke();
   if(r.vs<0.995){
-    c.strokeStyle="#a8831f"; c.lineWidth=1.4;
+    c.strokeStyle="#a8721f"; c.lineWidth=1.4;
     c.beginPath();
     TRI_V.forEach(function(v,n){
       const px=(r.vc[0]+r.vs*(v[0]-TRIC[0]))*W2, py=(r.vc[1]+r.vs*(v[1]-TRIC[1]))*H2;
@@ -1489,11 +1500,11 @@ function triPlot(r, hitHz){
     });
     c.closePath(); c.stroke();
   }
-  c.fillStyle="#2b2d30";
+  c.fillStyle="#3a2a20";
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 4.5, 0, 6.2832); c.fill();
-  c.strokeStyle="rgba(58,63,70,.36)"; c.lineWidth=1;
+  c.strokeStyle="rgba(94,62,42,.34)"; c.lineWidth=1;
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 9, 0, 6.2832); c.stroke();
-  c.fillStyle="#757a80"; c.font="9px ui-monospace,Menlo,monospace";
+  c.fillStyle="#9a7358"; c.font="9px ui-monospace,Menlo,monospace";
   c.fillText("outline is what you kept · the gold band is "+hitHz+" Hz", 13, H2-10);
   const div=document.createElement("div"); div.className="plot"; div.appendChild(cv); return div;
 }
