@@ -324,13 +324,19 @@
         <div class="knob"><label>Loudness</label>
           <div class="seg" id="seg-loud"><button data-v="1" class="on">Matched</button><button data-v="0">Raw</button></div>
           <span class="val">&nbsp;</span></div>
+        <div class="knob"><label>Playing on</label>
+          <div class="seg" id="seg-spk"><button data-v="1" class="on">Phone</button><button data-v="0">Headphones</button></div>
+          <span class="val">&nbsp;</span></div>
+        <div class="knob"><label for="bal">Levelling</label>
+          <input type="range" id="bal" min="0" max="100" step="1" value="100">
+          <span class="val" id="v-bal">100%</span></div>
         <div class="knob"><label>Hold to lock</label>
           <div class="seg" id="seg-settle"><button data-v="3">3s</button><button data-v="5" class="on">5s</button><button data-v="8">8s</button></div>
           <span class="val">&nbsp;</span></div>
         <div class="knob"><label>Scramble</label>
           <div class="seg" id="seg-scr"><button data-v="1">Gentle</button><button data-v="2" class="on">Normal</button><button data-v="4">Wild</button></div>
           <span class="val">&nbsp;</span></div>
-        <p class="bench-note">Damping under 1.00 lets the arms ring. Everything here applies live and is remembered. Terrain changes take effect on the next sweep.</p>
+        <p class="bench-note">Damping under 1.00 lets the arms ring. Everything here applies live and is remembered. Terrain changes take effect on the next sweep. Levelling corrects for what a phone speaker cannot reproduce, so the tones sit at one loudness and you pick by feel rather than by volume — it makes the top of the range much quieter, so turn the phone up. On headphones set Playing on to Headphones.</p>
       </div>
     </div>
   </div>
@@ -437,7 +443,7 @@ const posOf=f=>Math.log2(f/F_MIN)/SPAN;
 const cents=(a,b)=>1200*Math.log2(b/a);
 const NEED_OCT=1.5;
 
-let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:1};
+let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:1, spk:true, bal:1};
 const NARROWINGS=1;                 /* sweep, then the plane. that is the whole app. */
 /* the whole feel of the instrument, live-editable from the bench under the dial */
 let feel={omega:8.0, zeta:1.04, gear:0.72, drag:1.9, smooth:0.050, fr:4.4, scan:0.68};
@@ -534,6 +540,7 @@ function fieldAt(F,x,y){
 
 /* ================= audio ================= */
 let ctx=null, master=null, osc=null, gain=null, sounding=false;
+let osc2=null, osc3=null, g1=null, g2=null, g3=null;
 let humSrc=null, humGain=null;
 
 function aWeightDb(f){
@@ -542,19 +549,64 @@ function aWeightDb(f){
   const den=(f2+424.36)*Math.sqrt((f2+11599.29)*(f2+544496.41))*(f2+148693636);
   return 20*Math.log10(num/den)+2.0;
 }
-const weightFor=f=>Math.pow(10,-aWeightDb(f)/20);
-/* the equal-loudness anchor is a fixed reference, NOT F_MIN — tying it to the
-   floor meant every tone got quieter the moment the floor moved down. below
-   the reference the shape wants to exceed 1 and ampFor's min() clamps it, so
-   111 and 136.1 run at full scale rather than over it. */
-const LOUD_REF=140;
-const NORM=weightFor(LOUD_REF);
+/* ---- what the phone actually radiates ----
+   A-weighting models the ear and nothing else. On a phone the ear is not the
+   bottleneck: the speaker is a sealed box a few millimetres across, and under
+   its knee it falls away at roughly 12 dB per octave. 111 Hz arrives about
+   32 dB down, 1111 Hz arrives intact. That gap is why the top of the sweep
+   read as louder even with the ear curve already applied — the ear curve was
+   correcting for the wrong thing. */
+const SPK_KNEE=700, SPK_Q=0.8;
+function spkDb(f){
+  const r=f/SPK_KNEE, r2=r*r;
+  return 20*Math.log10(r2/Math.sqrt((1-r2)*(1-r2)+(r/SPK_Q)*(r/SPK_Q)));
+}
+const phoneMode=()=>cfg.loud&&cfg.spk;
+/* the missing fundamental. A speaker that cannot move air at 174 Hz can still
+   play 348 and 522, and the ear puts the pitch back at 174 by itself — it is
+   the only way a phone has ever played bass. Under the knee we fade 2f and 3f
+   in; over it the voice is a bare sine, exactly as it was. Without this,
+   levelling the band costs 50 dB and everything lands inaudible; with it the
+   same levelling costs 32 dB. The mix is normalised by sum of |gain| because
+   three partials can peak on the same sample. */
+function partialGains(f){
+  if(!phoneMode()) return [1,0,0];
+  let t=(SPK_KNEE-f)/(SPK_KNEE-F_MIN); t=t<0?0:(t>1?1:t);
+  const r=t*t, G=[1,0.85*r,0.45*r], sum=G[0]+G[1]+G[2];
+  return [G[0]/sum,G[1]/sum,G[2]/sum];
+}
+/* what the whole voice is predicted to sound like once the transducer and the
+   ear have both had their say: partial powers, weighted, summed. on
+   headphones there is no micro-speaker to correct for, so the speaker term
+   drops out entirely and this reduces to the ear curve on a bare sine. */
+function perceivedPow(f){
+  const g=partialGains(f), spk=phoneMode(); let p=0;
+  for(let k=0;k<3;k++){
+    if(g[k]<=0) continue;
+    const fk=f*(k+1);
+    p+=g[k]*g[k]*Math.pow(10,((spk?spkDb(fk):0)+aWeightDb(fk))/10);
+  }
+  return p;
+}
+/* the reference is the weakest point in the band. equalising upward is not
+   available — the bottom is already at the ceiling — so everything else is
+   brought down to meet it. */
+let PMIN=null, PMIN_FOR=null;
+function pmin(){
+  const key=phoneMode();
+  if(PMIN!==null&&PMIN_FOR===key) return PMIN;
+  let m=Infinity;
+  for(let f=F_MIN;f<=F_MAX;f+=1){ const p=perceivedPow(f); if(p<m) m=p; }
+  PMIN=m; PMIN_FOR=key; return m;
+}
 /* the instrument runs wide open: the loudest tone it can make sits just under
    full scale, so the phone's own volume keys are the only volume control that
    matters. 0.85 leaves exactly the headroom the hum (0.10) can add. */
 const CEIL=0.85;
 function ampFor(f){
-  const shape=cfg.loud ? weightFor(f)/NORM : 1;   // 1 at the loudest-perceived end
+  if(!cfg.loud) return Math.min(CEIL, CEIL*cfg.vol);
+  const full=Math.sqrt(pmin()/perceivedPow(f));   // <=1, fully levelled
+  const shape=Math.pow(full, cfg.bal);            // bal 0 = leave it alone
   return Math.min(CEIL, CEIL*cfg.vol*shape);
 }
 /* ---- iOS: get out of the ambient audio session ----
@@ -659,29 +711,49 @@ function ensureTone(f){
   ensureCtx();
   if(!ctx) return;
   if(!osc){
-    osc=ctx.createOscillator(); osc.type="sine"; osc.frequency.value=f;
-    gain=ctx.createGain(); gain.gain.value=0.0001;
-    osc.connect(gain); gain.connect(master); osc.start();
+    gain=ctx.createGain(); gain.gain.value=0.0001; gain.connect(master);
+    const mk=(mult,lvl)=>{
+      const o=ctx.createOscillator(); o.type="sine"; o.frequency.value=f*mult;
+      const g=ctx.createGain(); g.gain.value=lvl;
+      o.connect(g); g.connect(gain); o.start();
+      return [o,g];
+    };
+    /* 2f and 3f are built with the voice and live as long as it does; they
+       simply sit at zero until the fundamental drops under the knee */
+    const a=mk(1,1), b=mk(2,0), c=mk(3,0);
+    osc=a[0]; g1=a[1]; osc2=b[0]; g2=b[1]; osc3=c[0]; g3=c[1];
   }
   if(!sounding){ sounding=true; padEl.classList.add("live"); }
 }
+/* frequency, harmonic mix and level all move together, so there is exactly
+   one function that can put the voice out of step with itself */
+function applyVoice(f,glide){
+  if(!osc) return;
+  const t=ctx.currentTime, g=partialGains(f);
+  osc.frequency.setTargetAtTime(f, t, 0.05);
+  osc2.frequency.setTargetAtTime(f*2, t, 0.05);
+  osc3.frequency.setTargetAtTime(f*3, t, 0.05);
+  g1.gain.setTargetAtTime(g[0], t, 0.05);
+  g2.gain.setTargetAtTime(g[1], t, 0.05);
+  g3.gain.setTargetAtTime(g[2], t, 0.05);
+  gain.gain.setTargetAtTime(Math.max(0.004, ampFor(f)), t, glide||0.06);
+}
 function sound(f){
   ensureTone(f);
-  if(!osc) return;
-  osc.frequency.setTargetAtTime(f, ctx.currentTime, 0.05);
-  gain.gain.setTargetAtTime(Math.max(0.004, ampFor(f)), ctx.currentTime, 0.06);
+  applyVoice(f);
 }
 function silence(){
   setTimeout(releasePlayback, 600);       // after the 0.38 s fade has run out
   if(humGain) humGain.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
   if(!osc){ sounding=false; if(padEl) padEl.classList.remove("live"); return; }
-  const o=osc, g=gain; osc=null; gain=null; sounding=false;
+  const o=osc, o2=osc2, o3=osc3, g=gain;
+  osc=null; osc2=null; osc3=null; g1=null; g2=null; g3=null; gain=null; sounding=false;
   const t=ctx.currentTime;
   try{
     g.gain.cancelScheduledValues(t);
     g.gain.setValueAtTime(Math.max(0.0001,g.gain.value),t);
     g.gain.linearRampToValueAtTime(0.0001,t+0.38);
-    o.stop(t+0.43);
+    o.stop(t+0.43); o2.stop(t+0.43); o3.stop(t+0.43);
   }catch(e){}
   padEl.classList.remove("live");
   if(bgMode) clearMediaSession();
@@ -1402,7 +1474,15 @@ function segWire(sel,key,cast,after){
     if(after) after();
   });
 }
-segWire("#seg-loud","loud",v=>v==="1",saveFeel);
+const reLevel=()=>{ PMIN=null; if(sounding&&osc) applyVoice(curFreq(),0.08); saveFeel(); };
+segWire("#seg-loud","loud",v=>v==="1",reLevel);
+segWire("#seg-spk","spk",v=>v==="1",reLevel);
+$("#bal").addEventListener("input", e=>{
+  cfg.bal=Number(e.target.value)/100;
+  $("#v-bal").textContent=Math.round(cfg.bal*100)+"%";
+  if(sounding&&osc) applyVoice(curFreq(),0.08);
+  saveFeel();
+});
 segWire("#seg-settle","settle",Number,saveFeel);
 segWire("#seg-scr","scramble",Number,saveFeel);
 $("#hum").addEventListener("input", e=>{
@@ -1412,12 +1492,12 @@ $("#hum").addEventListener("input", e=>{
 $("#vol").addEventListener("input", e=>{
   cfg.vol=Number(e.target.value)/100;
   $("#v-vol").textContent=Math.round(cfg.vol*100)+"%";
-  if(sounding&&gain) gain.gain.setTargetAtTime(Math.max(0.004,ampFor(curFreq())), ctx.currentTime, 0.08);
+  if(sounding&&osc) applyVoice(curFreq(),0.08);
   saveFeel();
 });
 
 /* ================= the bench ================= */
-const FEELKEY="solfeggio:feel:3";   /* bumped so the new defaults are not overridden by an old save */
+const FEELKEY="solfeggio:feel:4";   /* bumped so the new defaults are not overridden by an old save */
 const KNOBS=[
   {id:"om", key:"omega",  to:v=>v/10,   from:v=>Math.round(v*10),   fmt:v=>"ω "+v.toFixed(1)},
   {id:"ze", key:"zeta",   to:v=>v/100,  from:v=>Math.round(v*100),  fmt:v=>"ζ "+v.toFixed(2)},
@@ -1439,7 +1519,9 @@ function renderBench(){
   $("#hum").value=Math.round(cfg.hum*100); $("#v-hum").textContent=Math.round(cfg.hum*100)+"%";
   const mark=(sel,val)=>$(sel).querySelectorAll("button").forEach(b=>
     b.classList.toggle("on", b.dataset.v===String(val)));
-  mark("#seg-loud", cfg.loud?1:0); mark("#seg-settle", cfg.settle); mark("#seg-scr", cfg.scramble);
+  $("#bal").value=Math.round(cfg.bal*100); $("#v-bal").textContent=Math.round(cfg.bal*100)+"%";
+  mark("#seg-loud", cfg.loud?1:0); mark("#seg-spk", cfg.spk?1:0);
+  mark("#seg-settle", cfg.settle); mark("#seg-scr", cfg.scramble);
   let match="";
   Object.keys(PRESET).forEach(n=>{
     const p=PRESET[n];
@@ -1523,8 +1605,8 @@ document.addEventListener("visibilitychange", ()=>{
       Object.keys(feel).forEach(k=>{ if(typeof f[k]==="number") feel[k]=f[k]; });
       if(saved.cfg){
         ["scramble","settle"].forEach(k=>{ if(typeof saved.cfg[k]==="number") cfg[k]=saved.cfg[k]; });
-        ["hum","vol"].forEach(k=>{ if(typeof saved.cfg[k]==="number") cfg[k]=saved.cfg[k]; });
-        if(typeof saved.cfg.loud==="boolean") cfg.loud=saved.cfg.loud;
+        ["hum","vol","bal"].forEach(k=>{ if(typeof saved.cfg[k]==="number") cfg[k]=saved.cfg[k]; });
+        ["loud","spk"].forEach(k=>{ if(typeof saved.cfg[k]==="boolean") cfg[k]=saved.cfg[k]; });
       }
     }
   }catch(e){}
