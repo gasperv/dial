@@ -63,9 +63,12 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
   /* ---- the header, which is not part of the rig ---- */
-  .topbar{display:flex;align-items:center;justify-content:space-between;
-    margin:0 0 var(--s2);padding:0 var(--s1)}
-  .mark{font-family:var(--display);font-size:var(--t-micro);font-weight:500;
+  /* the refresh sits dead centre; the wordmark is taken out of the flow so it
+     cannot pull the button off the middle of the page */
+  .topbar{position:relative;display:flex;align-items:center;justify-content:center;
+    margin:0 0 var(--s2);padding:0 var(--s1);min-height:34px}
+  .mark{position:absolute;left:var(--s1);top:50%;transform:translateY(-50%);
+    font-family:var(--display);font-size:var(--t-micro);font-weight:500;
     letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
   .iconbtn{background:var(--sunk);border:0;border-radius:var(--r1);color:var(--dim);
     width:34px;height:34px;display:grid;place-items:center;
