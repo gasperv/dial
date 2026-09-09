@@ -300,7 +300,7 @@
         <circle id="v-a" r="0.9" fill="#cfb69f"/>
         <circle id="v-b" r="0.9" fill="#cfb69f"/>
         <circle id="v-c" r="0.9" fill="#cfb69f"/>
-        <circle id="puck" r="1.5" fill="#3a2a20"/>
+        <circle id="puck" r="1.6" fill="#a8721f" stroke="#fbf5f0" stroke-width="0.42"/>
         <!-- holding still closes a ring around the point; closed = committed -->
         <circle id="hold-ring" r="6.2" fill="none" stroke="#a8721f" stroke-width="0.55"
                 stroke-linecap="round" opacity="0"/>
@@ -1500,9 +1500,11 @@ function triPlot(r, hitHz){
     });
     c.closePath(); c.stroke();
   }
-  c.fillStyle="#3a2a20";
+  c.fillStyle="#a8721f";
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 4.5, 0, 6.2832); c.fill();
-  c.strokeStyle="rgba(94,62,42,.34)"; c.lineWidth=1;
+  c.strokeStyle="#fbf5f0"; c.lineWidth=1.6;
+  c.beginPath(); c.arc(r.x*W2, r.y*H2, 4.5, 0, 6.2832); c.stroke();
+  c.strokeStyle="rgba(168,114,31,.5)"; c.lineWidth=1;
   c.beginPath(); c.arc(r.x*W2, r.y*H2, 9, 0, 6.2832); c.stroke();
   c.fillStyle="#9a7358"; c.font="9px ui-monospace,Menlo,monospace";
   c.fillText("outline is what you kept · the gold band is "+hitHz+" Hz", 13, H2-10);
