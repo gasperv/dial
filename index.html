@@ -203,7 +203,7 @@
   .kv .k{flex:0 0 84px;font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.13em;
     text-transform:uppercase;color:#9a7358;padding-top:4px}
   .kv .v{flex:1;color:#453227}
-  .keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:var(--s2)}
+  .keys{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:var(--s2)}
   .key{background:var(--sunk);border:0;border-radius:var(--r2);color:var(--dim);
     font-family:var(--mono);font-size:13px;padding:var(--s3) 4px;box-shadow:var(--lift-1);
     transition:background .18s,color .18s}
@@ -431,17 +431,9 @@
 
 /* ================= data ================= */
 const TONES = [
-  /* the four tones carrying an "origin" are not solfeggio. the briefing reads
-     the field and says so outright rather than letting them pass as part of
-     the set — which is what lets them share one list at all. */
-  {f:111, syl:"", chakra:"Under the ground — the chamber tone",
-   theme:"Stillness arriving from outside you, the hush of an enclosed space",
-   stones:"Shungite, jet, black obsidian",
-   origin:"the number traditions and the stone chambers it was measured in"},
-  {f:136.1, syl:"OM", chakra:"The whole body — the drone under the chant",
-   theme:"The steady note beneath everything, breath finding its own tempo",
-   stones:"Blue kyanite, sodalite, petrified wood",
-   origin:"Cousto's cosmic octave, the Earth's year raised thirty-two octaves"},
+  /* the nine solfeggio tones, and 1111. the odd one out carries an "origin",
+     which the briefing reads and states outright rather than letting it pass
+     as part of the set — which is what lets the two share one list at all. */
   {f:174, syl:"", chakra:"Below the root — the ground itself",
    theme:"Settling, safety, the easing of pain",
    stones:"Black tourmaline, smoky quartz, hematite"},
@@ -469,18 +461,14 @@ const TONES = [
   {f:963, syl:"SI", chakra:"Crown · Sahasrara",
    theme:"Unity, silence, the return upward",
    stones:"Clear quartz, selenite, moonstone"},
-  {f:999, syl:"", chakra:"Above the crown — the closing of the circuit",
-   theme:"Completion, the last turn of something long, letting a finished thing be finished",
-   stones:"Selenite, apophyllite, herkimer diamond",
-   origin:"the number traditions"},
   {f:1111, syl:"", chakra:"Beyond the body — the threshold",
    theme:"Attention snapping into place, the sense of being addressed, a door noticed",
    stones:"Danburite, phenacite, clear calcite",
    origin:"the number traditions"}
 ];
-/* the floor came down for 111 and 136.1, the ceiling went up for 1111. both
-   ends sit so the outermost tone keeps a catchment rather than a sliver. */
-const F_MIN=100, F_MAX=1220;
+/* the ceiling is up for 1111; the floor sits where 174 and 285 come out level
+   at about a fifth of the plane each, rather than 174 swallowing a third. */
+const F_MIN=145, F_MAX=1220;
 const SPAN=Math.log2(F_MAX/F_MIN);
 const posOf=f=>Math.log2(f/F_MIN)/SPAN;
 const cents=(a,b)=>1200*Math.log2(b/a);
@@ -1427,9 +1415,7 @@ async function finish(){
   if(x.f===396||x.f===417)
     notes.push("396 and 417 Hz sit 89 cents apart, closer than a semitone. Treat the pair as one region rather than a choice.");
   if(x.f===174||x.f===285)
-    notes.push("174 and 285 Hz sit either side of the widest empty stretch on the dial — 854 cents with nothing in it. Between them they catch about a third of the plane, so landing here is as much about the gap as about the tone.");
-  if(x.f===963||x.f===999)
-    notes.push("963 and 999 Hz are only 64 cents apart — the tightest pair on the dial, tighter than 396 and 417. Reading a difference between them is reading noise.");
+    notes.push("174 and 285 Hz sit either side of the widest empty stretch on the dial — 854 cents with nothing in it. Between them they catch close to two fifths of the plane, so landing here is as much about the gap as about the tone.");
   if(x.origin)
     notes.push(x.f+" Hz is not a solfeggio tone — it comes from "+x.origin+", and sits alongside the nine rather than among them. Worth knowing before you weigh what landing here means.");
   notes.push(past.length
