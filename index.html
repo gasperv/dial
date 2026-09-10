@@ -384,8 +384,8 @@
           <div class="seg" id="seg-spk"><button data-v="1" class="on">Phone</button><button data-v="0">Headphones</button></div>
           <span class="val">&nbsp;</span></div>
         <div class="knob"><label for="bal">Levelling</label>
-          <input type="range" id="bal" min="0" max="100" step="1" value="100">
-          <span class="val" id="v-bal">100%</span></div>
+          <input type="range" id="bal" min="0" max="100" step="1" value="65">
+          <span class="val" id="v-bal">65%</span></div>
         <div class="knob"><label>Hold to lock</label>
           <div class="seg" id="seg-settle"><button data-v="3">3s</button><button data-v="5" class="on">5s</button><button data-v="8">8s</button></div>
           <span class="val">&nbsp;</span></div>
@@ -393,7 +393,7 @@
           <div class="seg" id="seg-scr"><button data-v="1">Gentle</button><button data-v="2" class="on">Normal</button><button data-v="4">Wild</button></div>
           <span class="val">&nbsp;</span></div>
         <button class="benchreset" id="bench-reset" type="button">Reset the bench</button>
-        <p class="bench-note">Damping under 1.00 lets the arms ring. Everything here applies live and is remembered. Terrain changes take effect on the next sweep. Levelling corrects for what a phone speaker cannot reproduce, so the tones sit at one loudness and you pick by feel rather than by volume — it makes the top of the range much quieter, so turn the phone up. On headphones set Playing on to Headphones.</p>
+        <p class="bench-note">Damping under 1.00 lets the arms ring. Everything here applies live and is remembered. Terrain changes take effect on the next sweep. Levelling corrects for what a phone speaker cannot reproduce, so the tones sit at one loudness and you pick by feel rather than by volume. It works by folding 2f and 3f into the low tones, which a phone can actually radiate — so the higher you set it the more it colours them, and the lower you set it the purer they stay. At 0 every tone is a bare sine and nothing is corrected. Playing on Headphones is always a bare sine.</p>
       </div>
     </div>
   </div>
@@ -488,7 +488,7 @@ const posOf=f=>Math.log2(f/F_MIN)/SPAN;
 const cents=(a,b)=>1200*Math.log2(b/a);
 const NEED_OCT=1.5;
 
-let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:1, spk:true, bal:1};
+let cfg={scramble:2, hum:0.45, loud:true, settle:5, vol:1, spk:true, bal:0.65};
 const NARROWINGS=1;                 /* sweep, then the plane. that is the whole app. */
 /* the whole feel of the instrument, live-editable from the bench under the dial */
 let feel={omega:8.0, zeta:1.04, gear:0.72, drag:1.9, smooth:0.050, fr:4.4, scan:0.68};
@@ -623,7 +623,10 @@ const phoneMode=()=>cfg.loud&&cfg.spk;
 function partialGains(f){
   if(!phoneMode()) return [1,0,0];
   let t=(SPK_KNEE-f)/(SPK_KNEE-F_MIN); t=t<0?0:(t>1?1:t);
-  const r=t*t, G=[1,0.85*r,0.45*r], sum=G[0]+G[1]+G[2];
+  /* measured: at 0.85/0.45 the fundamental carried only 46% of the energy
+     at 174 Hz, so most of what you heard was not the tone you asked for.
+     capped so the fundamental keeps at least 70% of the mix everywhere. */
+  const r=t*t*cfg.bal, G=[1,0.31*r,0.165*r], sum=G[0]+G[1]+G[2];
   return [G[0]/sum,G[1]/sum,G[2]/sum];
 }
 /* what the whole voice is predicted to sound like once the transducer and the
@@ -644,7 +647,7 @@ function perceivedPow(f){
    brought down to meet it. */
 let PMIN=null, PMIN_FOR=null;
 function pmin(){
-  const key=phoneMode();
+  const key=phoneMode()+":"+cfg.bal;
   if(PMIN!==null&&PMIN_FOR===key) return PMIN;
   let m=Infinity;
   for(let f=F_MIN;f<=F_MAX;f+=1){ const p=perceivedPow(f); if(p<m) m=p; }
@@ -1552,7 +1555,7 @@ $("#vol").addEventListener("input", e=>{
 });
 
 /* ================= the bench ================= */
-const FEELKEY="solfeggio:feel:4";   /* bumped so the new defaults are not overridden by an old save */
+const FEELKEY="solfeggio:feel:5";   /* bumped so the new defaults are not overridden by an old save */
 const KNOBS=[
   {id:"om", key:"omega",  to:v=>v/10,   from:v=>Math.round(v*10),   fmt:v=>"ω "+v.toFixed(1)},
   {id:"ze", key:"zeta",   to:v=>v/100,  from:v=>Math.round(v*100),  fmt:v=>"ζ "+v.toFixed(2)},
