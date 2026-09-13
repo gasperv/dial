@@ -4,7 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#dcc7b6">
-<title>The Dial</title>
+<title>The Dial — solfeggio tones, 174 to 1111 Hz</title>
+<meta name="description" content="Sweep a plane of tone until you stop somewhere. The Dial snaps to the nearest solfeggio frequency, 174 to 1111 Hz, and tells you honestly how much that means.">
+<link rel="canonical" href="https://gasperv.github.io/dial/">
+
+<!-- shared links get a card rather than a bare URL -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Dial">
+<meta property="og:url" content="https://gasperv.github.io/dial/">
+<meta property="og:title" content="The Dial">
+<meta property="og:description" content="Sweep a plane of tone until you stop somewhere. The Dial snaps to the nearest solfeggio frequency, 174 to 1111 Hz, and tells you honestly how much that means.">
+<meta property="og:image" content="https://gasperv.github.io/dial/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A cream plate bearing a brass triangle with a single point on it, beside the words The Dial.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="The Dial">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
   :root{
     /* ---- clay & cream ----
@@ -430,6 +453,7 @@
   <hr class="rule">
   <h2>Past sittings</h2>
   <div class="hist" id="hist">No sittings saved yet.</div>
+  <p class="quiet" style="margin-top:14px">Sittings are kept in this browser on this device only. Nothing is sent anywhere, there are no accounts and no analytics, and clearing your browser data erases them for good.</p>
 
   <div class="row" style="margin-top:20px">
     <button class="ghost" id="btn-save">Save this sitting</button>
@@ -1466,6 +1490,11 @@ async function finish(){
 function triPlot(r, hitHz){
   const W2=304,H2=286;
   const cv=document.createElement("canvas");
+  /* the plot is the one graphic here that carries information rather than
+     decoration, so it gets a name instead of aria-hidden like the rest */
+  cv.setAttribute("role","img");
+  cv.setAttribute("aria-label","Map of the plane you swept. The gold band marks "
+    +hitHz+" hertz, the outlined region is the part you narrowed to, and the point is where you stopped.");
   cv.width=W2; cv.height=H2;
   const c=cv.getContext("2d");
   const img=c.createImageData(W2,H2);

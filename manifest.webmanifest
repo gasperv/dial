@@ -1,0 +1,17 @@
+{
+  "name": "The Dial",
+  "short_name": "The Dial",
+  "description": "Sweep a plane of tone until you stop somewhere. It snaps to the nearest solfeggio frequency and tells you honestly how much that means.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#dcc7b6",
+  "theme_color": "#dcc7b6",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
