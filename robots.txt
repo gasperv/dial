@@ -1,0 +1,5 @@
+# The Dial — one page, no crawl traps.
+User-agent: *
+Allow: /
+
+Sitemap: https://dial.vavti.eu/sitemap.xml
